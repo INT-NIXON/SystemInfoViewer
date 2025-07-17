@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "SystemInfoViewer (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "SystemInfoViewer (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
