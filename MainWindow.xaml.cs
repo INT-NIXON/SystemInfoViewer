@@ -4,18 +4,15 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Markup;
 using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Shapes;
+using Windows.Storage;
 using System;
 using System.Diagnostics;
-using System.Management;
-using Windows.UI;
 
 namespace SystemInfoViewer
 {
     public sealed partial class MainWindow : Window
     {
-        private DateTime _bootTime;
-        private DispatcherTimer _timer;
+        private const string THEME_SETTING_KEY = "AppTheme";
         private bool _isDarkTheme = false;
 
         public MainWindow()
@@ -23,14 +20,24 @@ namespace SystemInfoViewer
             this.InitializeComponent();
 
             // 设置窗口初始大小
-            SetWindowSize(900, 600);
+            SetWindowSize(1100, 750);
 
-            // 初始化系统信息
-            InitializeSystemInfo();
-            InitializeTimer();
+            // 初始化导航服务
+            NavigationService.Instance.Initialize(MainContentFrame);
 
-            // 设置初始主题为浅色
-            ApplyTheme(ElementTheme.Light);
+            // 自动导航到HomePage
+            try
+            {
+                NavigationService.Instance.Navigate(typeof(HomePage));
+                Debug.WriteLine("成功导航到HomePage");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"导航到HomePage失败: {ex.Message}");
+            }
+
+            // 恢复上次保存的主题
+            LoadSavedTheme();
         }
 
         private void SetWindowSize(int width, int height)
@@ -41,148 +48,77 @@ namespace SystemInfoViewer
             appWindow.Resize(new Windows.Graphics.SizeInt32(width, height));
         }
 
-        private void InitializeSystemInfo()
+        private void LoadSavedTheme()
         {
-            // 获取系统启动时间
-            using (var searcher = new ManagementObjectSearcher("SELECT LastBootUpTime FROM Win32_OperatingSystem"))
-            {
-                foreach (ManagementObject obj in searcher.Get())
-                {
-                    _bootTime = ManagementDateTimeConverter.ToDateTime(obj["LastBootUpTime"].ToString());
-                    BootTimeText.Text = _bootTime.ToString("yyyy-MM-dd HH:mm:ss");
-                    break;
-                }
-            }
-
-            // 操作系统信息
-            OSVersionText.Text = $"{Environment.OSVersion.VersionString} (Build {Environment.OSVersion.Version.Build})";
-            OSArchitectureText.Text = Environment.Is64BitOperatingSystem ? "64位" : "32位";
-            ComputerNameText.Text = Environment.MachineName;
-            UserNameText.Text = Environment.UserName;
-
-            // 处理器信息
-            using (var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_Processor"))
-            {
-                foreach (ManagementObject obj in searcher.Get())
-                {
-                    ProcessorText.Text = $"{obj["Name"]} ({obj["NumberOfCores"]}核心 {obj["NumberOfLogicalProcessors"]}线程)";
-                    break;
-                }
-            }
-
-            // 内存信息
-            using (var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_ComputerSystem"))
-            {
-                foreach (ManagementObject obj in searcher.Get())
-                {
-                    var totalMemoryBytes = Convert.ToDouble(obj["TotalPhysicalMemory"]);
-                    var totalMemoryGB = Math.Round(totalMemoryBytes / (1024 * 1024 * 1024), 2);
-                    MemoryText.Text = $"{totalMemoryGB} GB";
-                    break;
-                }
-            }
-
-            // 磁盘信息
-            var diskInfo = new System.Text.StringBuilder();
-            int diskCount = 0;
-            using (var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_DiskDrive WHERE MediaType='Fixed hard disk media'"))
-            {
-                foreach (ManagementObject disk in searcher.Get())
-                {
-                    diskCount++;
-                    var sizeBytes = Convert.ToUInt64(disk["Size"]);
-                    var sizeGB = Math.Round(sizeBytes / (1024.0 * 1024 * 1024), 1);
-                    diskInfo.AppendLine($"磁盘 {diskCount}: {disk["Model"]} - {sizeGB} GB");
-                }
-            }
-            DiskInfoText.Text = diskInfo.ToString();
-        }
-
-        private void InitializeTimer()
-        {
-            _timer = new DispatcherTimer();
-            _timer.Interval = TimeSpan.FromSeconds(1);
-            _timer.Tick += Timer_Tick;
-            _timer.Start();
-        }
-
-        private void Timer_Tick(object sender, object e)
-        {
-            // 更新当前时间
-            var now = DateTime.Now;
-            CurrentTimeText.Text = now.ToString("yyyy-MM-dd HH:mm:ss");
-
-            // 更新运行时间
-            if (_bootTime != DateTime.MinValue)
-            {
-                var uptime = now - _bootTime;
-                UptimeText.Text = $"{uptime.Days}天 {uptime.Hours}小时 {uptime.Minutes}分 {uptime.Seconds}秒";
-            }
-
-            // 更新内存使用情况
             try
             {
-                using (var searcher = new ManagementObjectSearcher("SELECT TotalVisibleMemorySize, FreePhysicalMemory FROM Win32_OperatingSystem"))
+                // 尝试从本地设置加载主题
+                if (ApplicationData.Current.LocalSettings.Values.TryGetValue(THEME_SETTING_KEY, out object savedTheme))
                 {
-                    foreach (ManagementObject obj in searcher.Get())
+                    if (Enum.TryParse<ElementTheme>(savedTheme.ToString(), out ElementTheme theme))
                     {
-                        var totalMemoryKB = Convert.ToUInt64(obj["TotalVisibleMemorySize"]);
-                        var freeMemoryKB = Convert.ToUInt64(obj["FreePhysicalMemory"]);
-                        var usedMemoryKB = totalMemoryKB - freeMemoryKB;
-
-                        var totalMemoryGB = Math.Round(totalMemoryKB / 1024.0 / 1024, 1);
-                        var usedMemoryGB = Math.Round(usedMemoryKB / 1024.0 / 1024, 1);
-
-                        MemoryUsageText.Text = $"{usedMemoryGB}GB / {totalMemoryGB}GB";
-                        break;
+                        ApplyTheme(theme);
+                        _isDarkTheme = theme == ElementTheme.Dark;
+                        Debug.WriteLine($"已加载保存的主题: {theme}");
+                        return;
                     }
                 }
+
+                // 如果没有保存的主题，使用系统默认主题
+                ElementTheme systemTheme = ((FrameworkElement)this.Content).ActualTheme;
+                ApplyTheme(systemTheme);
+                _isDarkTheme = systemTheme == ElementTheme.Dark;
+                Debug.WriteLine($"使用系统默认主题: {systemTheme}");
             }
             catch (Exception ex)
             {
-                MemoryUsageText.Text = "获取失败";
-                Debug.WriteLine($"获取内存使用失败: {ex.Message}");
+                // 出错时使用浅色主题作为回退
+                ApplyTheme(ElementTheme.Light);
+                Debug.WriteLine($"加载主题失败: {ex.Message}, 使用默认浅色主题");
             }
         }
 
         private void ThemeToggleButton_Click(object sender, RoutedEventArgs e)
         {
             _isDarkTheme = !_isDarkTheme;
-            var newTheme = _isDarkTheme ? ElementTheme.Dark : ElementTheme.Light;
-            ApplyTheme(newTheme);
+            ApplyTheme(_isDarkTheme ? ElementTheme.Dark : ElementTheme.Light);
         }
 
         private void ApplyTheme(ElementTheme theme)
         {
             try
             {
-                // 1. 设置根元素主题
-                RootGrid.RequestedTheme = theme;
+                // 应用主题到窗口内容
+                if (this.Content is FrameworkElement frameworkElement)
+                {
+                    frameworkElement.RequestedTheme = theme;
+                }
 
-                // 2. 手动更新文本颜色确保系统信息文本也更新
-                var textColor = theme == ElementTheme.Dark ? Colors.White : Colors.Black;
-                var textBrush = new SolidColorBrush(textColor);
-
-                OSVersionText.Foreground = textBrush;
-                OSArchitectureText.Foreground = textBrush;
-                ComputerNameText.Foreground = textBrush;
-                UserNameText.Foreground = textBrush;
-                ProcessorText.Foreground = textBrush;
-                MemoryText.Foreground = textBrush;
-                DiskInfoText.Foreground = textBrush;
-                MemoryUsageText.Foreground = textBrush;
-                BootTimeText.Foreground = textBrush;
-                CurrentTimeText.Foreground = textBrush;
-                UptimeText.Foreground = textBrush;
-
-                // 3. 更新主题图标
+                // 更新主题图标
                 UpdateThemeIcon(theme);
 
-                Debug.WriteLine($"主题切换至: {(theme == ElementTheme.Dark ? "深色" : "浅色")}模式");
+                // 保存主题设置
+                SaveThemeSetting(theme);
+
+                Debug.WriteLine($"主题切换至: {theme}");
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"主题切换错误: {ex.Message}");
+            }
+        }
+
+        private void SaveThemeSetting(ElementTheme theme)
+        {
+            try
+            {
+                // 保存主题到本地设置
+                ApplicationData.Current.LocalSettings.Values[THEME_SETTING_KEY] = theme.ToString();
+                Debug.WriteLine($"已保存主题设置: {theme}");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"保存主题设置失败: {ex.Message}");
             }
         }
 
@@ -196,10 +132,56 @@ namespace SystemInfoViewer
                 $"<Geometry xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'>{iconPath}</Geometry>");
         }
 
-        private void Window_Closing(object sender, WindowEventArgs args)
+        private void NavButton_Checked(object sender, RoutedEventArgs e)
         {
-            _timer?.Stop();
-            _timer = null;
+            var button = sender as RadioButton;
+            if (button == null) return;
+
+            Type pageType = null;
+
+            switch (button.Name)
+            {
+                case "HomeNavButton":
+                    pageType = typeof(HomePage);
+                    break;
+
+                case "ToolsNavButton":
+                    pageType = typeof(ToolsPage);
+                    break;
+
+                case "SettingsNavButton":
+                    pageType = typeof(SettingsPage);
+                    break;
+            }
+
+            if (pageType != null)
+            {
+                NavigationService.Instance.Navigate(pageType);
+            }
+        }
+        public sealed class NavigationService
+        {
+            private static readonly Lazy<NavigationService> lazy =
+                new Lazy<NavigationService>(() => new NavigationService());
+
+            public static NavigationService Instance { get { return lazy.Value; } }
+
+            private Frame _mainFrame;
+
+            private NavigationService() { }
+
+            public void Initialize(Frame frame)
+            {
+                _mainFrame = frame;
+            }
+
+            public void Navigate(Type pageType)
+            {
+                if (_mainFrame != null)
+                {
+                    _mainFrame.Navigate(pageType);
+                }
+            }
         }
     }
 }

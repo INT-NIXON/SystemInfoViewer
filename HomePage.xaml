@@ -1,0 +1,113 @@
+<Page
+    x:Class="SystemInfoViewer.HomePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:SystemInfoViewer"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <ScrollViewer Padding="16" VerticalScrollBarVisibility="Auto" Background="{ThemeResource SystemControlBackgroundAltHighBrush}">
+        <StackPanel Spacing="12">
+            <!-- 标题 -->
+            <TextBlock Text="信息" 
+                      Style="{StaticResource HeaderTextBlockStyle}"
+                      Margin="0,0,0,8"/>
+
+            <!-- 系统信息卡片 -->
+            <Border Style="{StaticResource InfoCardStyle}">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="系统信息" 
+                              Style="{StaticResource SubtitleTextBlockStyle}"/>
+
+                    <Grid Margin="0,8,0,0" ColumnSpacing="12" RowSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" MinWidth="120"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="操作系统:" Style="{StaticResource BodyTextBlockStyle}"/>
+                        <TextBlock x:Name="OSVersionText" Grid.Row="0" Grid.Column="1" Style="{StaticResource BodyTextBlockStyle}"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="系统架构:" Style="{StaticResource BodyTextBlockStyle}"/>
+                        <TextBlock x:Name="OSArchitectureText" Grid.Row="1" Grid.Column="1" Style="{StaticResource BodyTextBlockStyle}"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="计算机名称:" Style="{StaticResource BodyTextBlockStyle}"/>
+                        <TextBlock x:Name="ComputerNameText" Grid.Row="2" Grid.Column="1" Style="{StaticResource BodyTextBlockStyle}"/>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="用户名:" Style="{StaticResource BodyTextBlockStyle}"/>
+                        <TextBlock x:Name="UserNameText" Grid.Row="3" Grid.Column="1" Style="{StaticResource BodyTextBlockStyle}"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- 硬件信息卡片 -->
+            <Border Style="{StaticResource InfoCardStyle}">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="硬件信息" 
+                              Style="{StaticResource SubtitleTextBlockStyle}"/>
+
+                    <Grid Margin="0,8,0,0" ColumnSpacing="12" RowSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" MinWidth="120"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="处理器:" Style="{StaticResource BodyTextBlockStyle}"/>
+                        <TextBlock x:Name="ProcessorText" Grid.Row="0" Grid.Column="1" Style="{StaticResource BodyTextBlockStyle}"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="内存:" Style="{StaticResource BodyTextBlockStyle}"/>
+                        <TextBlock x:Name="MemoryText" Grid.Row="1" Grid.Column="1" Style="{StaticResource BodyTextBlockStyle}"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="磁盘:" Style="{StaticResource BodyTextBlockStyle}"/>
+                        <TextBlock x:Name="DiskInfoText" Grid.Row="2" Grid.Column="1" Style="{StaticResource BodyTextBlockStyle}" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- 运行状态卡片 -->
+            <Border Style="{StaticResource InfoCardStyle}">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="运行状态" 
+                              Style="{StaticResource SubtitleTextBlockStyle}"/>
+
+                    <Grid Margin="0,8,0,0" ColumnSpacing="12" RowSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" MinWidth="120"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="内存占用:" Style="{StaticResource BodyTextBlockStyle}"/>
+                        <TextBlock x:Name="MemoryUsageText" Grid.Row="0" Grid.Column="1" Style="{StaticResource BodyTextBlockStyle}"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="系统启动时间:" Style="{StaticResource BodyTextBlockStyle}"/>
+                        <TextBlock x:Name="BootTimeText" Grid.Row="1" Grid.Column="1" Style="{StaticResource BodyTextBlockStyle}"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="当前时间:" Style="{StaticResource BodyTextBlockStyle}"/>
+                        <TextBlock x:Name="CurrentTimeText" Grid.Row="2" Grid.Column="1" Style="{StaticResource BodyTextBlockStyle}"/>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="运行时间:" Style="{StaticResource BodyTextBlockStyle}"/>
+                        <TextBlock x:Name="UptimeText" Grid.Row="3" Grid.Column="1" Style="{StaticResource BodyTextBlockStyle}"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>
