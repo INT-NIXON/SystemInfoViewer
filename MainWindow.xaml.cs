@@ -19,6 +19,8 @@ namespace SystemInfoViewer
         private IntPtr _hWnd;
         private AppWindow _appWindow;
         private bool _isFirstActivation = true;
+        private bool _isRefreshing = false;
+        private WINDOWPLACEMENT _originalPlacement;
 
         public MainWindow()
         {
@@ -26,7 +28,7 @@ namespace SystemInfoViewer
             _hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
             InitializeAppWindow();
 
-            SetWindowSize(1100, 750);
+            SetWindowSize(1100, 760);
             InitializeNavigation();
 
             LoadSavedTheme();
@@ -59,20 +61,56 @@ namespace SystemInfoViewer
 
         private async void ForceTitleBarUpdate(bool isDark)
         {
-            if (_hWnd == IntPtr.Zero) return;
+            if (_hWnd == IntPtr.Zero || _isRefreshing) return;
 
-            SetDwmDarkMode(isDark);
-            UpdateAppWindowTitleBar(isDark);
-            RedrawWindowImmediately();
+            _isRefreshing = true;
 
-            nint lParam = (nint)(0x0100 | 0x0200);
-            PostMessage(_hWnd, WM_WINDOWPOSCHANGED, IntPtr.Zero, lParam);
+            try
+            {
+                _originalPlacement = new WINDOWPLACEMENT();
+                _originalPlacement.length = (uint)Marshal.SizeOf(_originalPlacement);
+                GetWindowPlacement(_hWnd, ref _originalPlacement);
 
-            await Task.Delay(50);
-            RedrawWindowImmediately();
+                SetDwmDarkMode(isDark);
+                UpdateAppWindowTitleBar(isDark);
+                RedrawWindowImmediately();
+                SendSyntheticResizeMessage();
 
-            ShowWindow(_hWnd, SW_HIDE);
-            ShowWindow(_hWnd, SW_SHOW);
+                if (_originalPlacement.showCmd != SW_MINIMIZE)
+                {
+                    // 将 uint 转换为 int
+                    ShowWindow(_hWnd, (int)SW_MINIMIZE);
+                    await Task.Delay(50);
+                    // 将 uint 转换为 int
+                    ShowWindow(_hWnd, (int)_originalPlacement.showCmd);
+                }
+
+                await Task.Delay(50);
+                RedrawWindowImmediately();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"刷新标题栏失败: {ex.Message}");
+
+                if (_originalPlacement.length > 0)
+                {
+                    SetWindowPlacement(_hWnd, ref _originalPlacement);
+                }
+            }
+            finally
+            {
+                _isRefreshing = false;
+            }
+        }
+
+        private void SendSyntheticResizeMessage()
+        {
+            WINDOWINFO windowInfo = new WINDOWINFO();
+            windowInfo.cbSize = (uint)Marshal.SizeOf(windowInfo);
+            GetWindowInfo(_hWnd, ref windowInfo);
+
+            PostMessage(_hWnd, WM_SIZE, (IntPtr)SIZE_RESTORED,
+                (IntPtr)((windowInfo.rcClient.Right << 16) | windowInfo.rcClient.Bottom));
         }
 
         private void UpdateAppWindowTitleBar(bool isDark)
@@ -141,19 +179,25 @@ namespace SystemInfoViewer
             SaveThemeSetting(theme);
         }
 
-        private void SetDwmDarkMode(bool enable)
+private void SetDwmDarkMode(bool enable)
+{
+    try
+    {
+        int attribute = Environment.OSVersion.Version.Build >= 18985 ? 20 : 19;
+        int value = enable ? 1 : 0;
+        
+        // 关键修改：将 uint 转换为 int
+        int result = DwmSetWindowAttribute(_hWnd, attribute, ref value, sizeof(int));
+        if (result != 0)
         {
-            try
-            {
-                int attribute = Environment.OSVersion.Version.Build >= 18985 ? 20 : 19;
-                int value = enable ? 1 : 0;
-                DwmSetWindowAttribute(_hWnd, attribute, ref value, sizeof(int));
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"DWM设置失败: {ex.Message}");
-            }
+            Debug.WriteLine($"DWM设置失败，错误码: {result}");
         }
+    }
+    catch (Exception ex)
+    {
+        Debug.WriteLine($"DWM设置异常: {ex.Message}");
+    }
+}
 
         private void InitializeNavigation()
         {
@@ -221,6 +265,58 @@ namespace SystemInfoViewer
             }
         }
 
+        [StructLayout(LayoutKind.Sequential)]
+        public struct RECT
+        {
+            public int Left;
+            public int Top;
+            public int Right;
+            public int Bottom;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct POINT
+        {
+            public int X;
+            public int Y;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct WINDOWPLACEMENT
+        {
+            public uint length;
+            public uint flags;
+            public uint showCmd;
+            public POINT ptMinPosition;
+            public POINT ptMaxPosition;
+            public RECT rcNormalPosition;
+            public RECT rcDevice;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct WINDOWINFO
+        {
+            public uint cbSize;
+            public RECT rcWindow;
+            public RECT rcClient;
+            public uint dwStyle;
+            public uint dwExStyle;
+            public uint dwWindowStatus;
+            public uint cxWindowBorders;
+            public uint cyWindowBorders;
+            public ushort atomWindowType;
+            public ushort wCreatorVersion;
+        }
+
+        [DllImport("user32.dll")]
+        private static extern bool GetWindowPlacement(IntPtr hWnd, ref WINDOWPLACEMENT lpwndpl);
+
+        [DllImport("user32.dll")]
+        private static extern bool SetWindowPlacement(IntPtr hWnd, [In] ref WINDOWPLACEMENT lpwndpl);
+
+        [DllImport("user32.dll")]
+        private static extern bool GetWindowInfo(IntPtr hwnd, ref WINDOWINFO pwi);
+
         [DllImport("user32.dll")]
         private static extern bool RedrawWindow(IntPtr hWnd, IntPtr lprcUpdate, IntPtr hrgnUpdate, uint flags);
 
@@ -234,18 +330,19 @@ namespace SystemInfoViewer
         private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
 
         [DllImport("user32.dll")]
-        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+        private static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
 
         [DllImport("user32.dll")]
-        private static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, nint lParam);
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
         private const uint RDW_FRAME = 0x0020;
         private const uint RDW_INVALIDATE = 0x0001;
         private const uint RDW_UPDATENOW = 0x0100;
         private const uint RDW_ALLCHILDREN = 0x0080;
-        private const int SW_HIDE = 0;
-        private const int SW_SHOW = 5;
-        private const uint WM_WINDOWPOSCHANGED = 0x0047;
+        private const uint WM_SIZE = 0x0005;
+        private const int SIZE_RESTORED = 0;
+        private const int SW_MINIMIZE = 6;
+        private const int SW_RESTORE = 9;
     }
 
     public class NavigationService
