@@ -6,8 +6,9 @@ using Microsoft.UI.Xaml.Markup;
 using Microsoft.UI.Xaml.Media;
 using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using SystemInfoViewer.Helpers;
-using Windows.Storage;
 
 namespace SystemInfoViewer
 {
@@ -15,112 +16,172 @@ namespace SystemInfoViewer
     {
         private const string THEME_SETTING_KEY = "AppTheme";
         private bool _isDarkTheme = false;
+        private IntPtr _hWnd;
+        private AppWindow _appWindow;
+        private bool _isFirstActivation = true;
 
         public MainWindow()
         {
             this.InitializeComponent();
+            _hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+            InitializeAppWindow();
 
-            // 设置窗口初始大小
             SetWindowSize(1100, 750);
+            InitializeNavigation();
 
-            // 初始化导航服务
-            NavigationService.Instance.Initialize(MainContentFrame);
-
-            // 自动导航到HomePage
-            try
-            {
-                NavigationService.Instance.Navigate(typeof(HomePage));
-                Debug.WriteLine("成功导航到HomePage");
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"导航到HomePage失败: {ex.Message}");
-            }
-
-            // 恢复上次保存的主题
             LoadSavedTheme();
+            DispatcherQueue.TryEnqueue(() => ForceTitleBarUpdate(_isDarkTheme));
+
+            this.Activated += MainWindow_Activated;
         }
 
-        private void SetWindowSize(int width, int height)
+        private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
         {
-            var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
-            var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd);
-            var appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId);
-            appWindow.Resize(new Windows.Graphics.SizeInt32(width, height));
+            if (_isFirstActivation)
+            {
+                ForceTitleBarUpdate(_isDarkTheme);
+                _isFirstActivation = false;
+            }
         }
 
-        private void LoadSavedTheme()
+        private void InitializeAppWindow()
         {
             try
             {
-                // 从setup.ini读取主题设置（Section=Theme, Key=CurrentTheme）
-                string savedTheme = FileHelper.ReadIniValue("Theme", "CurrentTheme");
-
-                if (!string.IsNullOrEmpty(savedTheme) &&
-                    Enum.TryParse<ElementTheme>(savedTheme, out ElementTheme theme))
-                {
-                    ApplyTheme(theme);
-                    _isDarkTheme = theme == ElementTheme.Dark;
-                    Debug.WriteLine($"已加载保存的主题: {theme}");
-                    return;
-                }
-
-                // 无保存设置时使用系统默认主题
-                ElementTheme systemTheme = ((FrameworkElement)this.Content).ActualTheme;
-                ApplyTheme(systemTheme);
-                _isDarkTheme = systemTheme == ElementTheme.Dark;
-                Debug.WriteLine($"使用系统默认主题: {systemTheme}");
+                var windowId = Win32Interop.GetWindowIdFromWindow(_hWnd);
+                _appWindow = AppWindow.GetFromWindowId(windowId);
             }
             catch (Exception ex)
             {
-                // 出错时使用浅色主题作为回退
-                ApplyTheme(ElementTheme.Light);
-                Debug.WriteLine($"加载主题失败: {ex.Message}, 使用默认浅色主题");
+                Debug.WriteLine($"初始化AppWindow失败: {ex.Message}");
             }
+        }
+
+        private async void ForceTitleBarUpdate(bool isDark)
+        {
+            if (_hWnd == IntPtr.Zero) return;
+
+            SetDwmDarkMode(isDark);
+            UpdateAppWindowTitleBar(isDark);
+            RedrawWindowImmediately();
+
+            nint lParam = (nint)(0x0100 | 0x0200);
+            PostMessage(_hWnd, WM_WINDOWPOSCHANGED, IntPtr.Zero, lParam);
+
+            await Task.Delay(50);
+            RedrawWindowImmediately();
+
+            ShowWindow(_hWnd, SW_HIDE);
+            ShowWindow(_hWnd, SW_SHOW);
+        }
+
+        private void UpdateAppWindowTitleBar(bool isDark)
+        {
+            if (_appWindow?.TitleBar == null) return;
+
+            var titleBar = _appWindow.TitleBar;
+            titleBar.ExtendsContentIntoTitleBar = false;
+
+            if (isDark)
+            {
+                titleBar.BackgroundColor = Microsoft.UI.Colors.DarkGray;
+                titleBar.ForegroundColor = Microsoft.UI.Colors.White;
+                titleBar.ButtonBackgroundColor = Microsoft.UI.Colors.DarkGray;
+                titleBar.ButtonForegroundColor = Microsoft.UI.Colors.White;
+                titleBar.ButtonHoverBackgroundColor = Microsoft.UI.Colors.Gray;
+                titleBar.ButtonHoverForegroundColor = Microsoft.UI.Colors.White;
+                titleBar.ButtonPressedBackgroundColor = Microsoft.UI.Colors.Black;
+                titleBar.ButtonPressedForegroundColor = Microsoft.UI.Colors.White;
+                titleBar.InactiveBackgroundColor = Microsoft.UI.Colors.Gray;
+                titleBar.InactiveForegroundColor = Microsoft.UI.Colors.LightGray;
+            }
+            else
+            {
+                titleBar.BackgroundColor = Microsoft.UI.Colors.White;
+                titleBar.ForegroundColor = Microsoft.UI.Colors.Black;
+                titleBar.ButtonBackgroundColor = Microsoft.UI.Colors.White;
+                titleBar.ButtonForegroundColor = Microsoft.UI.Colors.Black;
+                titleBar.ButtonHoverBackgroundColor = Microsoft.UI.Colors.LightGray;
+                titleBar.ButtonHoverForegroundColor = Microsoft.UI.Colors.Black;
+                titleBar.ButtonPressedBackgroundColor = Microsoft.UI.Colors.Gray;
+                titleBar.ButtonPressedForegroundColor = Microsoft.UI.Colors.Black;
+                titleBar.InactiveBackgroundColor = Microsoft.UI.Colors.LightGray;
+                titleBar.InactiveForegroundColor = Microsoft.UI.Colors.DarkGray;
+            }
+        }
+
+        private void RedrawWindowImmediately()
+        {
+            if (_hWnd == IntPtr.Zero) return;
+
+            RedrawWindow(
+                _hWnd,
+                IntPtr.Zero,
+                IntPtr.Zero,
+                RDW_FRAME | RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN
+            );
+
+            DwmFlush();
         }
 
         private void ThemeToggleButton_Click(object sender, RoutedEventArgs e)
         {
             _isDarkTheme = !_isDarkTheme;
             ApplyTheme(_isDarkTheme ? ElementTheme.Dark : ElementTheme.Light);
+            DispatcherQueue.TryEnqueue(() => ForceTitleBarUpdate(_isDarkTheme));
         }
 
         private void ApplyTheme(ElementTheme theme)
         {
-            try
+            if (Content is FrameworkElement frameworkElement)
             {
-                // 应用主题到窗口内容
-                if (this.Content is FrameworkElement frameworkElement)
-                {
-                    frameworkElement.RequestedTheme = theme;
-                }
-
-                // 更新主题图标
-                UpdateThemeIcon(theme);
-
-                // 保存主题设置
-                SaveThemeSetting(theme);
-
-                Debug.WriteLine($"主题切换至: {theme}");
+                frameworkElement.RequestedTheme = theme;
             }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"主题切换错误: {ex.Message}");
-            }
+            UpdateThemeIcon(theme);
+            SaveThemeSetting(theme);
         }
 
-        private void SaveThemeSetting(ElementTheme theme)
+        private void SetDwmDarkMode(bool enable)
         {
             try
             {
-                // 将主题设置写入setup.ini（Section=Theme, Key=CurrentTheme）
-                FileHelper.WriteIniValue("Theme", "CurrentTheme", theme.ToString());
-                Debug.WriteLine($"已保存主题设置到setup.ini: {theme}");
+                int attribute = Environment.OSVersion.Version.Build >= 18985 ? 20 : 19;
+                int value = enable ? 1 : 0;
+                DwmSetWindowAttribute(_hWnd, attribute, ref value, sizeof(int));
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"保存主题设置失败: {ex.Message}");
+                Debug.WriteLine($"DWM设置失败: {ex.Message}");
             }
+        }
+
+        private void InitializeNavigation()
+        {
+            if (MainContentFrame != null)
+            {
+                NavigationService.Instance.Initialize(MainContentFrame);
+                try { NavigationService.Instance.Navigate(typeof(HomePage)); }
+                catch (Exception ex) { Debug.WriteLine($"导航失败: {ex.Message}"); }
+            }
+        }
+
+        private void LoadSavedTheme()
+        {
+            ElementTheme appliedTheme = ElementTheme.Light;
+            try
+            {
+                string savedTheme = FileHelper.ReadIniValue("Theme", "CurrentTheme");
+                if (Enum.TryParse<ElementTheme>(savedTheme, out var theme))
+                    appliedTheme = theme;
+                else
+                    appliedTheme = ((FrameworkElement)Content).ActualTheme;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"加载主题失败: {ex.Message}");
+            }
+            _isDarkTheme = appliedTheme == ElementTheme.Dark;
+            ApplyTheme(appliedTheme);
         }
 
         private void UpdateThemeIcon(ElementTheme theme)
@@ -133,60 +194,67 @@ namespace SystemInfoViewer
                 $"<Geometry xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'>{iconPath}</Geometry>");
         }
 
+        private void SaveThemeSetting(ElementTheme theme)
+        {
+            try { FileHelper.WriteIniValue("Theme", "CurrentTheme", theme.ToString()); }
+            catch (Exception ex) { Debug.WriteLine($"保存主题失败: {ex.Message}"); }
+        }
+
+        private void SetWindowSize(int width, int height)
+        {
+            SetWindowPos(_hWnd, IntPtr.Zero, 0, 0, width, height, 0x0002 | 0x0004 | 0x0040);
+        }
+
         private void NavButton_Checked(object sender, RoutedEventArgs e)
         {
-            var button = sender as RadioButton;
-            if (button == null) return;
-
-            Type pageType = null;
-
-            switch (button.Name)
+            if (sender is RadioButton button)
             {
-                case "HomeNavButton":
-                    pageType = typeof(HomePage);
-                    break;
-
-                case "ToolsNavButton":
-                    pageType = typeof(ToolsPage);
-                    break;
-
-                case "SettingsNavButton":
-                    pageType = typeof(SettingsPage);
-                    break;
-
-                case "AboutButton":
-                    pageType = typeof(AboutPage);  // 导航到关于页面
-                    break;
-            }
-
-            if (pageType != null)
-            {
-                NavigationService.Instance.Navigate(pageType);
-            }
-        }
-        public sealed class NavigationService
-        {
-            private static readonly Lazy<NavigationService> lazy =
-                new Lazy<NavigationService>(() => new NavigationService());
-
-            public static NavigationService Instance { get { return lazy.Value; } }
-
-            private Frame _mainFrame;
-
-            private NavigationService() { }
-
-            public void Initialize(Frame frame)
-            {
-                _mainFrame = frame;
-            }
-
-            public void Navigate(Type pageType)
-            {
-                if (_mainFrame != null)
+                Type pageType = button.Name switch
                 {
-                    _mainFrame.Navigate(pageType);
-                }
+                    "HomeNavButton" => typeof(HomePage),
+                    "ToolsNavButton" => typeof(ToolsPage),
+                    "SettingsNavButton" => typeof(SettingsPage),
+                    "AboutButton" => typeof(AboutPage),
+                    _ => null
+                };
+                if (pageType != null) NavigationService.Instance.Navigate(pageType);
             }
         }
+
+        [DllImport("user32.dll")]
+        private static extern bool RedrawWindow(IntPtr hWnd, IntPtr lprcUpdate, IntPtr hrgnUpdate, uint flags);
+
+        [DllImport("dwmapi.dll")]
+        private static extern void DwmFlush();
+
+        [DllImport("dwmapi.dll")]
+        private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
+
+        [DllImport("user32.dll")]
+        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
+        [DllImport("user32.dll")]
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        [DllImport("user32.dll")]
+        private static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, nint lParam);
+
+        private const uint RDW_FRAME = 0x0020;
+        private const uint RDW_INVALIDATE = 0x0001;
+        private const uint RDW_UPDATENOW = 0x0100;
+        private const uint RDW_ALLCHILDREN = 0x0080;
+        private const int SW_HIDE = 0;
+        private const int SW_SHOW = 5;
+        private const uint WM_WINDOWPOSCHANGED = 0x0047;
+    }
+
+    public class NavigationService
+    {
+        private static readonly Lazy<NavigationService> _instance = new(() => new NavigationService());
+        public static NavigationService Instance => _instance.Value;
+        private Frame _frame;
+        private NavigationService() { }
+        public void Initialize(Frame frame) => _frame = frame;
+        public void Navigate(Type pageType) => _frame?.Navigate(pageType);
     }
 }

@@ -26,7 +26,6 @@ namespace SystemInfoViewer
             }
             catch (Exception ex)
             {
-                // 处理打开链接时可能发生的异常
                 System.Diagnostics.Debug.WriteLine($"Failed to launch URI: {ex.Message}");
             }
         }
