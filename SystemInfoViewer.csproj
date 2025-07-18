@@ -34,6 +34,7 @@
     <Content Remove="Assets\Square44x44Logo.targetsize-48.png" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="AboutPage.xaml" />
     <None Remove="HomePage.xaml" />
     <None Remove="SettingsPage.xaml" />
     <None Remove="ToolsPage.xaml" />
@@ -68,6 +69,9 @@
     <PackageReference Include="System.Management" Version="9.0.7" />
   </ItemGroup>
   <ItemGroup>
+    <Page Update="AboutPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <None Update="Apps\everything.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -153,6 +153,10 @@ namespace SystemInfoViewer
                 case "SettingsNavButton":
                     pageType = typeof(SettingsPage);
                     break;
+
+                case "AboutButton":
+                    pageType = typeof(AboutPage);  // 导航到关于页面
+                    break;
             }
 
             if (pageType != null)
