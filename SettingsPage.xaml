@@ -13,7 +13,7 @@
 
             <Border Style="{StaticResource InfoCardStyle}">
                 <StackPanel Spacing="8">
-                    <TextBlock Text="应用程序设置" 
+                    <TextBlock Text="没做完 Orz" 
                               Style="{StaticResource SubtitleTextBlockStyle}"/>
                 </StackPanel>
             </Border>

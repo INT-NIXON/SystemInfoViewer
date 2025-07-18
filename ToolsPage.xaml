@@ -15,11 +15,41 @@
                 <StackPanel>
                     <TextBlock Text="系统工具" 
                               Style="{StaticResource SubtitleTextBlockStyle}"/>
-                    <Button Content="打开任务管理器"
+                    <StackPanel Orientation="Horizontal" Margin="0,12,0,0" Spacing="12">
+                        <Button Content="打开任务管理器"
                             Margin="0,12,0,0"
                             HorizontalAlignment="Left"
                             Click="OpenTaskManager_Click"/>
+                        <Button Content="打开注册表编辑器"
+                            Margin="0,12,0,0"
+                            HorizontalAlignment="Left"
+                            Click="Openregedit_Click"/>
+                        <Button Content="打开命令提示符"
+                            Margin="0,12,0,0"
+                            HorizontalAlignment="Left"
+                            Click="Opencmd_Click"/>
+                        <Button Content="打开磁盘清理"
+                            Margin="0,12,0,0"
+                            HorizontalAlignment="Left"
+                            Click="Opencleanmgr_Click"/>
+                    </StackPanel>
                 </StackPanel>
+            </Border>
+            <Border Style="{StaticResource InfoCardStyle}">
+            <StackPanel>
+                <TextBlock Text="第三方工具" 
+                  Style="{StaticResource SubtitleTextBlockStyle}"/>
+                <StackPanel Orientation="Horizontal" Margin="0,12,0,0" Spacing="12">
+                        <Button Content="打开Geek"
+                            Margin="0,12,0,0"
+                            HorizontalAlignment="Left"
+                            Click="Opengeek_Click"/>
+                        <Button Content="打开Everything"
+                            Margin="0,12,0,0"
+                            HorizontalAlignment="Left"
+                            Click="Openeverything_Click"/>
+                    </StackPanel>
+            </StackPanel>
             </Border>
         </StackPanel>
     </ScrollViewer>

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using Microsoft.UI.Xaml;
 
 namespace SystemInfoViewer.Helpers
 {
@@ -17,14 +18,8 @@ namespace SystemInfoViewer.Helpers
         // 获取应用配置目录路径
         public static string GetAppConfigPath()
         {
-            // 直接获取系统全局的AppData\Roaming路径（绕过UWP重定向）
-            string realRoamingPath = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),  // 获取用户目录（如C:\Users\Administrator）
-                "AppData",
-                "Roaming",
-                ".SystemInfoViewer"
-            );
-            return realRoamingPath;
+            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            return Path.Combine(appDataPath, ".SystemInfoViewer");
         }
 
         // 获取setup.ini文件路径
