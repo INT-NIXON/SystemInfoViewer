@@ -4,9 +4,10 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Markup;
 using Microsoft.UI.Xaml.Media;
-using Windows.Storage;
 using System;
 using System.Diagnostics;
+using SystemInfoViewer.Helpers;
+using Windows.Storage;
 
 namespace SystemInfoViewer
 {
@@ -52,19 +53,19 @@ namespace SystemInfoViewer
         {
             try
             {
-                // 尝试从本地设置加载主题
-                if (ApplicationData.Current.LocalSettings.Values.TryGetValue(THEME_SETTING_KEY, out object savedTheme))
+                // 从setup.ini读取主题设置（Section=Theme, Key=CurrentTheme）
+                string savedTheme = FileHelper.ReadIniValue("Theme", "CurrentTheme");
+
+                if (!string.IsNullOrEmpty(savedTheme) &&
+                    Enum.TryParse<ElementTheme>(savedTheme, out ElementTheme theme))
                 {
-                    if (Enum.TryParse<ElementTheme>(savedTheme.ToString(), out ElementTheme theme))
-                    {
-                        ApplyTheme(theme);
-                        _isDarkTheme = theme == ElementTheme.Dark;
-                        Debug.WriteLine($"已加载保存的主题: {theme}");
-                        return;
-                    }
+                    ApplyTheme(theme);
+                    _isDarkTheme = theme == ElementTheme.Dark;
+                    Debug.WriteLine($"已加载保存的主题: {theme}");
+                    return;
                 }
 
-                // 如果没有保存的主题，使用系统默认主题
+                // 无保存设置时使用系统默认主题
                 ElementTheme systemTheme = ((FrameworkElement)this.Content).ActualTheme;
                 ApplyTheme(systemTheme);
                 _isDarkTheme = systemTheme == ElementTheme.Dark;
@@ -112,9 +113,9 @@ namespace SystemInfoViewer
         {
             try
             {
-                // 保存主题到本地设置
-                ApplicationData.Current.LocalSettings.Values[THEME_SETTING_KEY] = theme.ToString();
-                Debug.WriteLine($"已保存主题设置: {theme}");
+                // 将主题设置写入setup.ini（Section=Theme, Key=CurrentTheme）
+                FileHelper.WriteIniValue("Theme", "CurrentTheme", theme.ToString());
+                Debug.WriteLine($"已保存主题设置到setup.ini: {theme}");
             }
             catch (Exception ex)
             {
