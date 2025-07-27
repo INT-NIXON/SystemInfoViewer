@@ -17,11 +17,14 @@
                         <!-- 浅色主题 -->
                         <ResourceDictionary x:Key="Light">
                             <!-- 系统颜色 -->
+                            <SolidColorBrush x:Key="WindowCaptionBackground">Transparent</SolidColorBrush>
+                            <SolidColorBrush x:Key="WindowCaptionBackgroundDisabled">Transparent</SolidColorBrush>
                             <Color x:Key="SystemAccentColor">#0067C0</Color>
                             <SolidColorBrush x:Key="AppBackgroundBrush" Color="#FAFAFA"/>
                             <SolidColorBrush x:Key="SidebarBackgroundBrush" Color="#F5F5F5"/>
                             <SolidColorBrush x:Key="TextFillColorPrimaryBrush" Color="#1A1A1A"/>
                             <SolidColorBrush x:Key="TextFillColorSecondaryBrush" Color="#5E5E5E"/>
+                            <SolidColorBrush x:Key="TitleBarBackgroundBrush" Color="#FFFFFFFF"/>
 
                             <!-- 控件颜色 -->
                             <SolidColorBrush x:Key="ButtonBackgroundBrush" Color="Transparent"/>
@@ -40,10 +43,13 @@
                         <!-- 深色主题 -->
                         <ResourceDictionary x:Key="Dark">
                             <!-- 系统颜色 -->
+                            <SolidColorBrush x:Key="WindowCaptionBackground">Transparent</SolidColorBrush>
+                            <SolidColorBrush x:Key="WindowCaptionBackgroundDisabled">Transparent</SolidColorBrush>
                             <SolidColorBrush x:Key="AppBackgroundBrush" Color="#202020"/>
                             <SolidColorBrush x:Key="SidebarBackgroundBrush" Color="#2B2B2B"/>
                             <SolidColorBrush x:Key="TextFillColorPrimaryBrush" Color="#F5F5F5"/>
                             <SolidColorBrush x:Key="TextFillColorSecondaryBrush" Color="#A0A0A0"/>
+                            <SolidColorBrush x:Key="TitleBarBackgroundBrush" Color="#FF000000"/>
 
                             <!-- 控件颜色 -->
                             <SolidColorBrush x:Key="ButtonBackgroundBrush" Color="Transparent"/>
@@ -66,7 +72,13 @@
                         ms-appx:///Assets/Fonts/HarmonyOS_Sans_Bold.ttf#HarmonyOS Sans SC
                     </FontFamily>
 
-                    <!-- 文本样式（统一使用HarmonyOS_Sans_Bold字体） -->
+                    <!-- 文本样式 -->
+                    <Style x:Key="CaptionTextBlockStyle" TargetType="TextBlock">
+                        <Setter Property="FontFamily" Value="{StaticResource HarmonyBoldFont}"/>
+                        <Setter Property="FontSize" Value="12"/>
+                        <Setter Property="Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}"/>
+                    </Style>
+
                     <Style x:Key="HeaderTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextStyle}">
                         <Setter Property="FontSize" Value="28"/>
                         <Setter Property="FontWeight" Value="Bold"/>
@@ -99,7 +111,7 @@
                         <Setter Property="Margin" Value="0,0,0,16"/>
                     </Style>
 
-                    <!-- 导航按钮样式（添加字体设置） -->
+                    <!-- 导航按钮样式 -->
                     <Style x:Key="NavButtonStyle" TargetType="RadioButton">
                         <Setter Property="Background" Value="{ThemeResource ButtonBackgroundBrush}"/>
                         <Setter Property="BorderBrush" Value="Transparent"/>
@@ -180,7 +192,82 @@
                         </Setter>
                     </Style>
 
-                    <!-- 通用按钮样式（添加字体设置） -->
+                    <!-- 标题栏按钮样式 -->
+                    <Style x:Key="TitleBarButtonStyle" TargetType="Button">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="Foreground" Value="{ThemeResource SystemControlForegroundBaseHighBrush}"/>
+                        <Setter Property="Width" Value="46"/>
+                        <Setter Property="Height" Value="32"/>
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Grid>
+                                        <VisualStateManager.VisualStateGroups>
+                                            <VisualStateGroup x:Name="CommonStates">
+                                                <VisualState x:Name="Normal"/>
+                                                <VisualState x:Name="PointerOver">
+                                                    <Storyboard>
+                                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Background" Storyboard.TargetProperty="Background">
+                                                            <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonHoverBackgroundBrush}"/>
+                                                        </ObjectAnimationUsingKeyFrames>
+                                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="IconPath" Storyboard.TargetProperty="Stroke">
+                                                            <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource SystemControlForegroundBaseHighBrush}"/>
+                                                        </ObjectAnimationUsingKeyFrames>
+                                                    </Storyboard>
+                                                </VisualState>
+                                                <VisualState x:Name="Pressed">
+                                                    <Storyboard>
+                                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Background" Storyboard.TargetProperty="Background">
+                                                            <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonPressedBackgroundBrush}"/>
+                                                        </ObjectAnimationUsingKeyFrames>
+                                                    </Storyboard>
+                                                </VisualState>
+                                            </VisualStateGroup>
+                                        </VisualStateManager.VisualStateGroups>
+                                    </Grid>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+
+                    <Style x:Key="TitleBarCloseButtonStyle" TargetType="Button" BasedOn="{StaticResource TitleBarButtonStyle}">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Grid>
+                                        <VisualStateManager.VisualStateGroups>
+                                            <VisualStateGroup x:Name="CommonStates">
+                                                <VisualState x:Name="Normal"/>
+                                                <VisualState x:Name="PointerOver">
+                                                    <Storyboard>
+                                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Background" Storyboard.TargetProperty="Background">
+                                                            <DiscreteObjectKeyFrame KeyTime="0" Value="#E81123"/>
+                                                        </ObjectAnimationUsingKeyFrames>
+                                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="CloseIcon" Storyboard.TargetProperty="Stroke">
+                                                            <DiscreteObjectKeyFrame KeyTime="0" Value="White"/>
+                                                        </ObjectAnimationUsingKeyFrames>
+                                                    </Storyboard>
+                                                </VisualState>
+                                                <VisualState x:Name="Pressed">
+                                                    <Storyboard>
+                                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Background" Storyboard.TargetProperty="Background">
+                                                            <DiscreteObjectKeyFrame KeyTime="0" Value="#F1707A"/>
+                                                        </ObjectAnimationUsingKeyFrames>
+                                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="CloseIcon" Storyboard.TargetProperty="Stroke">
+                                                            <DiscreteObjectKeyFrame KeyTime="0" Value="White"/>
+                                                        </ObjectAnimationUsingKeyFrames>
+                                                    </Storyboard>
+                                                </VisualState>
+                                            </VisualStateGroup>
+                                        </VisualStateManager.VisualStateGroups>
+                                    </Grid>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+
+                    <!-- 通用按钮样式 -->
                     <Style x:Key="AccentButtonStyle" TargetType="Button">
                         <Setter Property="Background" Value="{ThemeResource SystemAccentColor}"/>
                         <Setter Property="Foreground" Value="White"/>
@@ -243,4 +330,4 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
-</Application>    
+</Application>

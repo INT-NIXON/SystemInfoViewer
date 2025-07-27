@@ -22,10 +22,10 @@ namespace SystemInfoViewer.Helpers
             return Path.Combine(appDataPath, ".SystemInfoViewer");
         }
 
-        // 获取setup.ini文件路径
+        // 获取Config.ini文件路径
         public static string GetSetupIniPath()
         {
-            return Path.Combine(GetAppConfigPath(), "setup.ini");
+            return Path.Combine(GetAppConfigPath(), "Config.ini");
         }
 
         // 确保配置目录存在
