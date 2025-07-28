@@ -7,12 +7,10 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <!-- WinUI 3 默认控件资源 -->
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
 
                 <!-- 应用程序自定义资源 -->
                 <ResourceDictionary>
-                    <!-- 1. 先放属性元素（ThemeDictionaries 是 ResourceDictionary 的属性元素） -->
                     <ResourceDictionary.ThemeDictionaries>
                         <!-- 浅色主题 -->
                         <ResourceDictionary x:Key="Light">
@@ -66,7 +64,6 @@
                         </ResourceDictionary>
                     </ResourceDictionary.ThemeDictionaries>
 
-                    <!-- 2. 再放其他资源（字体、样式等） -->
                     <!-- 字体定义 -->
                     <FontFamily x:Key="HarmonyBoldFont">
                         ms-appx:///Assets/Fonts/HarmonyOS_Sans_Bold.ttf#HarmonyOS Sans SC
