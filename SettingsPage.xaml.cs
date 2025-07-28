@@ -16,13 +16,14 @@ namespace SystemInfoViewer
 
         private async void DelConfig_Click(object sender, RoutedEventArgs e)
         {
-            ContentDialog dialog = new ContentDialog
+            var dialog = new ContentDialog
             {
                 Title = "确认重置",
                 Content = "确定要重置所有设置吗？这将删除所有配置并重启应用。",
                 PrimaryButtonText = "确定",
                 CloseButtonText = "取消",
-                XamlRoot = this.XamlRoot
+                XamlRoot = this.XamlRoot,
+                RequestedTheme = this.ActualTheme
             };
 
             var result = await dialog.ShowAsync();
