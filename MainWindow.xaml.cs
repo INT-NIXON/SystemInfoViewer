@@ -36,7 +36,7 @@ namespace SystemInfoViewer
             InitializeWindow();
             InitializeNavigation();
             LoadSavedTheme();
-
+            ForceTitleBarUpdate(_isDarkTheme).ConfigureAwait(false);
             this.Activated += MainWindow_Activated;
             this.Closed += MainWindow_Closed;
         }
@@ -158,7 +158,7 @@ namespace SystemInfoViewer
         private void MainWindow_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
         {
             UpdateTitleBarButtons();
-            ForceTitleBarUpdate(_isDarkTheme);
+            ForceTitleBarUpdate(_isDarkTheme).ConfigureAwait(false);
         }
 
         private void UpdateTitleBarButtons()
@@ -187,6 +187,13 @@ namespace SystemInfoViewer
             {
                 if (_appWindow?.TitleBar != null)
                 {
+                    var foreground = isDark ? Colors.White : Colors.Black;
+
+                    _appWindow.TitleBar.ButtonForegroundColor = foreground;
+                    _appWindow.TitleBar.ButtonHoverForegroundColor = foreground;
+                    _appWindow.TitleBar.ButtonPressedForegroundColor = foreground;
+                    _appWindow.TitleBar.ButtonInactiveForegroundColor = foreground;
+
                     _appWindow.TitleBar.ButtonBackgroundColor = Colors.Transparent;
                     _appWindow.TitleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
                 }
@@ -271,7 +278,7 @@ namespace SystemInfoViewer
             catch (Exception ex)
             {
                 Debug.WriteLine($"加载主题设置失败: {ex.Message}");
-                _isDarkTheme = false; // 默认值
+                _isDarkTheme = false;
                 ApplyTheme(ElementTheme.Light);
             }
         }
@@ -306,6 +313,7 @@ namespace SystemInfoViewer
         {
             _isDarkTheme = !_isDarkTheme;
             ApplyTheme(_isDarkTheme ? ElementTheme.Dark : ElementTheme.Light);
+            ForceTitleBarUpdate(_isDarkTheme).ConfigureAwait(false);
             SaveThemeSetting(_isDarkTheme ? ElementTheme.Dark : ElementTheme.Light);
         }
 
