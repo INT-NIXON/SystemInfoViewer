@@ -15,15 +15,50 @@
 
             <Border Style="{StaticResource InfoCardStyle}">
                 <StackPanel Spacing="8">
-                    <TextBlock Text="软件作者：xrlzu" 
+                    <TextBlock Text="软件版本" 
                               Style="{StaticResource SubtitleTextBlockStyle}"/>
-                    <TextBlock Style="{StaticResource SubtitleTextBlockStyle}">
-                        <Run Text="Github页面："/>
-                        <Hyperlink NavigateUri="https://github.com/xrlzu/SystemInfoViewer" 
-                                   Click="GithubLink_Click">
-                            https://github.com/xrlzu/SystemInfoViewer
-                        </Hyperlink>
-                    </TextBlock>
+
+                    <Grid Margin="0,8,0,0" ColumnSpacing="12" RowSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" MinWidth="120"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="当前版本： 1.0-beta.1" Style="{StaticResource SubtitleTextBlockStyle}" Grid.Row="0"/>
+                        <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Grid.Row="1" Grid.ColumnSpan="2">
+    <Run Text="最新版本："/>
+    <Run x:Name="LatestversionRun" Text="获取中..."/>
+                        </TextBlock>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource InfoCardStyle}">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="作者信息" 
+                              Style="{StaticResource SubtitleTextBlockStyle}"/>
+
+                    <Grid Margin="0,8,0,0" ColumnSpacing="12" RowSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" MinWidth="120"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="软件作者：xrlzu" 
+           Style="{StaticResource SubtitleTextBlockStyle}" Grid.Row="0"/>
+                        <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Grid.Row="1">
+    <Run Text="Github页面："/>
+    <Hyperlink NavigateUri="https://github.com/xrlzu/SystemInfoViewer">
+        <Run Text="https://github.com/xrlzu/SystemInfoViewer"/>
+    </Hyperlink>
+                        </TextBlock>
+                    </Grid>
                 </StackPanel>
             </Border>
         </StackPanel>

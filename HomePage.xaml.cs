@@ -236,7 +236,7 @@ namespace SystemInfoViewer
                         {
                             var sizeBytes = Convert.ToUInt64(disk["Size"]);
                             var sizeGB = Math.Round(sizeBytes / (1024.0 * 1024 * 1024), 1);
-                            diskInfo.AppendLine($"╢еел: {disk["Model"]} - {sizeGB} GB");
+                            diskInfo.AppendLine($"{disk["Model"]} - {sizeGB} GB");
                         }
                     }
 

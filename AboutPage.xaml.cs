@@ -1,9 +1,9 @@
-using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Documents;
 using System;
-using Windows.System;
-using Windows.UI.Xaml;
+using System.Net.Http;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace SystemInfoViewer
 {
@@ -12,21 +12,40 @@ namespace SystemInfoViewer
         public AboutPage()
         {
             this.InitializeComponent();
+            LoadLatestVersion();
         }
 
-        private async void GithubLink_Click(object sender, RoutedEventArgs e)
+        private async void LoadLatestVersion()
         {
             try
             {
-                var hyperlink = sender as Hyperlink;
-                if (hyperlink?.NavigateUri != null)
+                using (var client = new HttpClient())
                 {
-                    await Launcher.LaunchUriAsync(hyperlink.NavigateUri);
+                    client.DefaultRequestHeaders.Add("User-Agent", "SystemInfoViewer");
+                    var response = await client.GetAsync("https://api.github.com/repos/xrlzu/SystemInfoViewer/releases");
+                    response.EnsureSuccessStatusCode();
+
+                    var content = await response.Content.ReadAsStringAsync();
+
+                    using (JsonDocument doc = JsonDocument.Parse(content))
+                    {
+                        var releases = doc.RootElement.EnumerateArray();
+                        if (releases.MoveNext())
+                        {
+                            var latestRelease = releases.Current;
+                            var version = latestRelease.GetProperty("tag_name").GetString();
+                            LatestversionRun.Text = version;
+                        }
+                        else
+                        {
+                            LatestversionRun.Text = "无发布版本";
+                        }
+                    }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                System.Diagnostics.Debug.WriteLine($"Failed to launch URI: {ex.Message}");
+                LatestversionRun.Text = "获取失败";
             }
         }
     }
