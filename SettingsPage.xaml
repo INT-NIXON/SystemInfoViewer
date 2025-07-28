@@ -13,8 +13,14 @@
 
             <Border Style="{StaticResource InfoCardStyle}">
                 <StackPanel Spacing="8">
-                    <TextBlock Text="没做完 Orz" 
+                    <TextBlock Text="重置" 
                               Style="{StaticResource SubtitleTextBlockStyle}"/>
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Button Content="重置设置"
+                            Margin="0,12,0,0"
+                            HorizontalAlignment="Left"
+                            Click="DelConfig_Click"/>
+                    </StackPanel>
                 </StackPanel>
             </Border>
         </StackPanel>
