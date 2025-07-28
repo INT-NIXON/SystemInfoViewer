@@ -10,35 +10,55 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using SystemInfoViewer.Helpers;
+using Windows.Foundation;
 using Windows.Graphics;
 using Windows.System;
-using WinRT.Interop;
-using Microsoft.UI.Input;
 using Windows.UI.Core;
-using Windows.Foundation;
+using WinRT.Interop;
+using WindowActivatedEventArgs = Microsoft.UI.Xaml.WindowActivatedEventArgs;
 
 namespace SystemInfoViewer
 {
     public sealed partial class MainWindow : Window
     {
         private const string THEME_SETTING_KEY = "AppTheme";
+        private static bool _originalAnimationEnabled = true;
         private bool _isDarkTheme = false;
         private IntPtr _hWnd;
         private AppWindow _appWindow;
         private OverlappedPresenter _presenter;
         private DispatcherTimer _timer;
+        private bool _isDragging = false;
+        private Point _dragStartPoint;
 
         public MainWindow()
         {
             this.InitializeComponent();
-
+            RestoreWindowAnimation();
             _hWnd = WindowNative.GetWindowHandle(this);
             InitializeWindow();
             InitializeNavigation();
             LoadSavedTheme();
             ForceTitleBarUpdate(_isDarkTheme).ConfigureAwait(false);
+
             this.Activated += MainWindow_Activated;
             this.Closed += MainWindow_Closed;
+        }
+
+        private void RestoreWindowAnimation()
+        {
+            try
+            {
+                _originalAnimationEnabled = SystemParametersInfoHelper.GetAnimationEnabled();
+                if (!_originalAnimationEnabled)
+                {
+                    SystemParametersInfoHelper.SetAnimationEnabled(true);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"恢复窗口动画设置失败: {ex.Message}");
+            }
         }
 
         private void InitializeWindow()
@@ -95,9 +115,6 @@ namespace SystemInfoViewer
             }
         }
 
-        private bool _isDragging = false;
-        private Point _dragStartPoint;
-
         private void CustomTitleBar_PointerPressed(object sender, PointerRoutedEventArgs e)
         {
             var pointerPoint = e.GetCurrentPoint(CustomTitleBar);
@@ -105,7 +122,6 @@ namespace SystemInfoViewer
             {
                 _isDragging = true;
                 _dragStartPoint = pointerPoint.Position;
-
                 CustomTitleBar.CapturePointer(e.Pointer);
             }
         }
@@ -146,7 +162,7 @@ namespace SystemInfoViewer
             UpdateTitleBarButtons();
         }
 
-        private void MainWindow_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
+        private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
         {
             UpdateTitleBarButtons();
             ForceTitleBarUpdate(_isDarkTheme).ConfigureAwait(false);
@@ -159,8 +175,8 @@ namespace SystemInfoViewer
                 try
                 {
                     string pathData = _presenter.State == OverlappedPresenterState.Maximized
-                        ? "M2,2 L10,2 L10,10 L2,10 Z M3,3 L9,3 L9,9 L3,9 Z" // 还原图标
-                        : "M0,0 L12,0 L12,12 L0,12 Z"; // 最大化图标
+                        ? "M2,2 L10,2 L10,10 L2,10 Z M3,3 L9,3 L9,9 L3,9 Z"
+                        : "M0,0 L12,0 L12,12 L0,12 Z";
 
                     MaximizeIcon.Data = (Geometry)XamlReader.Load(
                         $"<Geometry xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'>{pathData}</Geometry>");
@@ -228,6 +244,18 @@ namespace SystemInfoViewer
         {
             _timer?.Stop();
             _timer = null;
+
+            try
+            {
+                if (!_originalAnimationEnabled)
+                {
+                    SystemParametersInfoHelper.SetAnimationEnabled(false);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"恢复原始窗口动画设置失败: {ex.Message}");
+            }
         }
 
         private void SetWindowSize(int width, int height)
@@ -258,6 +286,7 @@ namespace SystemInfoViewer
                 NavigationService.Instance.Navigate(typeof(HomePage));
             }
         }
+
         private void LoadSavedTheme()
         {
             try
@@ -333,6 +362,7 @@ namespace SystemInfoViewer
                 }
             }
         }
+
         internal static class User32
         {
             public const int WM_NCLBUTTONDOWN = 0xA1;
@@ -373,6 +403,40 @@ namespace SystemInfoViewer
                     Debug.WriteLine($"导航失败: {ex.Message}");
                 }
             }
+        }
+    }
+
+    internal static class SystemParametersInfoHelper
+    {
+        private const int SPI_GETANIMATION = 0x0048;
+        private const int SPI_SETANIMATION = 0x0049;
+        private const int SPIF_SENDCHANGE = 0x0002;
+        private const int SPIF_UPDATEINIFILE = 0x0001;
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct ANIMATIONINFO
+        {
+            public uint cbSize;
+            public int iMinAnimate;
+        }
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool SystemParametersInfo(int uiAction, int uiParam, ref ANIMATIONINFO pvParam, int fWinIni);
+
+        public static bool GetAnimationEnabled()
+        {
+            ANIMATIONINFO info = new ANIMATIONINFO();
+            info.cbSize = (uint)Marshal.SizeOf(typeof(ANIMATIONINFO));
+            SystemParametersInfo(SPI_GETANIMATION, 0, ref info, 0);
+            return info.iMinAnimate != 0;
+        }
+
+        public static void SetAnimationEnabled(bool enable)
+        {
+            ANIMATIONINFO info = new ANIMATIONINFO();
+            info.cbSize = (uint)Marshal.SizeOf(typeof(ANIMATIONINFO));
+            info.iMinAnimate = enable ? 1 : 0;
+            SystemParametersInfo(SPI_SETANIMATION, 0, ref info, SPIF_UPDATEINIFILE | SPIF_SENDCHANGE);
         }
     }
 }
