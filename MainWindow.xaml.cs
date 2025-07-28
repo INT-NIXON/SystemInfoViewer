@@ -58,14 +58,12 @@ namespace SystemInfoViewer
                 }
             };
 
-            // 确保不修改系统动画，只设置基本窗口行为
             _presenter = _appWindow.Presenter as OverlappedPresenter;
             if (_presenter != null)
             {
                 _presenter.IsMaximizable = true;
                 _presenter.IsMinimizable = true;
                 _presenter.IsResizable = true;
-                // 移除任何可能影响系统设置的代码
             }
         }
 
@@ -73,20 +71,16 @@ namespace SystemInfoViewer
         {
             if (AppWindowTitleBar.IsCustomizationSupported())
             {
-                // 正确设置自定义标题栏
                 _appWindow.TitleBar.ExtendsContentIntoTitleBar = true;
 
-                // 设置标题栏按钮背景色为透明（不尝试修改LeftInset和RightInset）
                 _appWindow.TitleBar.ButtonBackgroundColor = Colors.Transparent;
                 _appWindow.TitleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
                 _appWindow.TitleBar.ButtonHoverBackgroundColor = Colors.Transparent;
                 _appWindow.TitleBar.ButtonPressedBackgroundColor = Colors.Transparent;
 
-                // 设置标题栏为完全透明
                 _appWindow.TitleBar.BackgroundColor = Colors.Transparent;
                 _appWindow.TitleBar.InactiveBackgroundColor = Colors.Transparent;
 
-                // 设置自定义标题栏区域
                 SetTitleBar(CustomTitleBar);
 
                 _presenter = _appWindow.Presenter as OverlappedPresenter;
@@ -97,7 +91,6 @@ namespace SystemInfoViewer
                     _presenter.IsResizable = true;
                 }
 
-                // 调整标题栏高度以消除白条
                 CustomTitleBar.Height = _appWindow.TitleBar.Height;
             }
         }
@@ -107,13 +100,12 @@ namespace SystemInfoViewer
 
         private void CustomTitleBar_PointerPressed(object sender, PointerRoutedEventArgs e)
         {
-            // 检查是否是左键按下
             var pointerPoint = e.GetCurrentPoint(CustomTitleBar);
             if (pointerPoint.Properties.IsLeftButtonPressed)
             {
                 _isDragging = true;
                 _dragStartPoint = pointerPoint.Position;
-                // 捕获指针以确保后续事件能被正确接收
+
                 CustomTitleBar.CapturePointer(e.Pointer);
             }
         }
@@ -123,11 +115,10 @@ namespace SystemInfoViewer
             if (_isDragging)
             {
                 var pointerPoint = e.GetCurrentPoint(CustomTitleBar);
-                // 检查是否移动了足够的距离以触发拖动
+
                 if (Math.Abs(pointerPoint.Position.X - _dragStartPoint.X) > 2 ||
                     Math.Abs(pointerPoint.Position.Y - _dragStartPoint.Y) > 2)
                 {
-                    // 使用Win32 API进行窗口拖动
                     User32.ReleaseCapture();
                     User32.SendMessage(_hWnd, User32.WM_NCLBUTTONDOWN, User32.HT_CAPTION, 0);
                     _isDragging = false;
