@@ -23,7 +23,8 @@
                             <SolidColorBrush x:Key="TextFillColorPrimaryBrush" Color="#1A1A1A"/>
                             <SolidColorBrush x:Key="TextFillColorSecondaryBrush" Color="#5E5E5E"/>
                             <SolidColorBrush x:Key="TitleBarBackgroundBrush" Color="#FFFFFFFF"/>
-
+                            <SolidColorBrush x:Key="TitleBarIconForeground" Color="#1A1A1A"/>
+                            
                             <!-- 控件颜色 -->
                             <SolidColorBrush x:Key="ButtonBackgroundBrush" Color="Transparent"/>
                             <SolidColorBrush x:Key="ButtonHoverBackgroundBrush" Color="#E8E8E8"/>
@@ -48,6 +49,7 @@
                             <SolidColorBrush x:Key="TextFillColorPrimaryBrush" Color="#F5F5F5"/>
                             <SolidColorBrush x:Key="TextFillColorSecondaryBrush" Color="#A0A0A0"/>
                             <SolidColorBrush x:Key="TitleBarBackgroundBrush" Color="#FF000000"/>
+                            <SolidColorBrush x:Key="TitleBarIconForeground" Color="#F5F5F5"/>
 
                             <!-- 控件颜色 -->
                             <SolidColorBrush x:Key="ButtonBackgroundBrush" Color="Transparent"/>
@@ -192,14 +194,17 @@
                     <!-- 标题栏按钮样式 -->
                     <Style x:Key="TitleBarButtonStyle" TargetType="Button">
                         <Setter Property="Background" Value="Transparent"/>
-                        <Setter Property="Foreground" Value="{ThemeResource SystemControlForegroundBaseHighBrush}"/>
+                        <Setter Property="Foreground" Value="{ThemeResource TitleBarIconForeground}"/>
                         <Setter Property="Width" Value="46"/>
                         <Setter Property="Height" Value="32"/>
                         <Setter Property="Padding" Value="0"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                        <Setter Property="VerticalContentAlignment" Value="Center"/>
                         <Setter Property="Template">
                             <Setter.Value>
                                 <ControlTemplate TargetType="Button">
                                     <Grid>
+                                        <!-- 视觉状态组必须放在Grid内部 -->
                                         <VisualStateManager.VisualStateGroups>
                                             <VisualStateGroup x:Name="CommonStates">
                                                 <VisualState x:Name="Normal"/>
@@ -207,9 +212,6 @@
                                                     <Storyboard>
                                                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Background" Storyboard.TargetProperty="Background">
                                                             <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonHoverBackgroundBrush}"/>
-                                                        </ObjectAnimationUsingKeyFrames>
-                                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="IconPath" Storyboard.TargetProperty="Stroke">
-                                                            <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource SystemControlForegroundBaseHighBrush}"/>
                                                         </ObjectAnimationUsingKeyFrames>
                                                     </Storyboard>
                                                 </VisualState>
@@ -222,6 +224,19 @@
                                                 </VisualState>
                                             </VisualStateGroup>
                                         </VisualStateManager.VisualStateGroups>
+
+                                        <!-- 背景元素 -->
+                                        <Border x:Name="Background" 
+                            Background="{TemplateBinding Background}"
+                            Width="{TemplateBinding Width}"
+                            Height="{TemplateBinding Height}"
+                            CornerRadius="0"/>
+
+                                        <!-- 内容呈现器 -->
+                                        <ContentPresenter x:Name="ContentPresenter"
+                                      Content="{TemplateBinding Content}"
+                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
                                     </Grid>
                                 </ControlTemplate>
                             </Setter.Value>
@@ -241,7 +256,7 @@
                                                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Background" Storyboard.TargetProperty="Background">
                                                             <DiscreteObjectKeyFrame KeyTime="0" Value="#E81123"/>
                                                         </ObjectAnimationUsingKeyFrames>
-                                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="CloseIcon" Storyboard.TargetProperty="Stroke">
+                                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="Foreground">
                                                             <DiscreteObjectKeyFrame KeyTime="0" Value="White"/>
                                                         </ObjectAnimationUsingKeyFrames>
                                                     </Storyboard>
@@ -251,13 +266,24 @@
                                                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Background" Storyboard.TargetProperty="Background">
                                                             <DiscreteObjectKeyFrame KeyTime="0" Value="#F1707A"/>
                                                         </ObjectAnimationUsingKeyFrames>
-                                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="CloseIcon" Storyboard.TargetProperty="Stroke">
+                                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="Foreground">
                                                             <DiscreteObjectKeyFrame KeyTime="0" Value="White"/>
                                                         </ObjectAnimationUsingKeyFrames>
                                                     </Storyboard>
                                                 </VisualState>
                                             </VisualStateGroup>
                                         </VisualStateManager.VisualStateGroups>
+
+                                        <Border x:Name="Background" 
+                            Background="{TemplateBinding Background}"
+                            Width="{TemplateBinding Width}"
+                            Height="{TemplateBinding Height}"
+                            CornerRadius="0"/>
+
+                                        <ContentPresenter x:Name="ContentPresenter"
+                                      Content="{TemplateBinding Content}"
+                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
                                     </Grid>
                                 </ControlTemplate>
                             </Setter.Value>

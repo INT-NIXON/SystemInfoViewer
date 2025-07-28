@@ -46,7 +46,7 @@ namespace SystemInfoViewer
             var windowId = Win32Interop.GetWindowIdFromWindow(_hWnd);
             _appWindow = AppWindow.GetFromWindowId(windowId);
 
-            SetWindowSize(1100, 700);
+            SetWindowSize(1100, 760);
             ConfigureCustomTitleBar();
             InitializeTimer();
 

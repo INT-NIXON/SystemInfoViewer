@@ -40,9 +40,9 @@
                 <Button x:Name="MinimizeButton" Click="MinimizeButton_Click" Style="{StaticResource TitleBarButtonStyle}">
                     <Viewbox Width="12" Height="12">
                         <Path Data="M0,6 L12,6" 
-                              Stroke="{ThemeResource SystemControlForegroundBaseHighBrush}"
-                              StrokeEndLineCap="Square"
-                              StrokeStartLineCap="Square"/>
+                  Stroke="{Binding Foreground, RelativeSource={RelativeSource Mode=TemplatedParent}}"
+                  StrokeEndLineCap="Square"
+                  StrokeStartLineCap="Square"/>
                     </Viewbox>
                 </Button>
 
@@ -50,9 +50,9 @@
                 <Button x:Name="MaximizeButton" Click="MaximizeButton_Click" Style="{StaticResource TitleBarButtonStyle}">
                     <Viewbox Width="12" Height="12">
                         <Path x:Name="MaximizeIcon" 
-                              Data="M0,0 L12,0 L12,12 L0,12 Z" 
-                              Stroke="{ThemeResource SystemControlForegroundBaseHighBrush}"
-                              Fill="Transparent"/>
+                  Data="M0,0 L12,0 L12,12 L0,12 Z" 
+                  Stroke="{Binding Foreground, RelativeSource={RelativeSource Mode=TemplatedParent}}"
+                  Fill="Transparent"/>
                     </Viewbox>
                 </Button>
 
@@ -60,7 +60,7 @@
                 <Button x:Name="CloseButton" Click="CloseButton_Click" Style="{StaticResource TitleBarCloseButtonStyle}">
                     <Viewbox Width="10" Height="10">
                         <Path Data="M0,0 L10,10 M10,0 L0,10" 
-                              Stroke="{ThemeResource SystemControlForegroundBaseHighBrush}" />
+                  Stroke="{Binding Foreground, RelativeSource={RelativeSource Mode=TemplatedParent}}"/>
                     </Viewbox>
                 </Button>
             </StackPanel>
