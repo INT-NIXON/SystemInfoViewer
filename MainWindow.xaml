@@ -34,7 +34,7 @@
                            Style="{StaticResource CaptionTextBlockStyle}"/>
             </StackPanel>
 
-            <!-- 窗口控制按钮 (Fixed version) -->
+            <!-- 窗口控制按钮 -->
             <StackPanel Grid.Column="2" Orientation="Horizontal">
                 <!-- 最小化按钮 -->
                 <Button x:Name="MinimizeButton" Click="MinimizeButton_Click" Style="{StaticResource TitleBarButtonStyle}">
