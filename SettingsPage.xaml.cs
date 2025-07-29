@@ -11,6 +11,8 @@ namespace SystemInfoViewer
     {
         private const string ANIMATION_SETTING_KEY = "WindowAnimationEnabled";
         private bool _isProcessingToggle = false;
+        // 默认值设置为true，与"显示窗口动画"的预期默认行为一致
+        private const bool DEFAULT_ANIMATION_STATE = true;
 
         public SettingsPage()
         {
@@ -19,37 +21,45 @@ namespace SystemInfoViewer
         }
 
         /// <summary>
-        /// 加载窗口动画设置
+        /// 加载窗口动画设置，读取失败时默认打开
         /// </summary>
         private void LoadAnimationSetting()
         {
             try
             {
+                // 读取保存的设置，默认为空字符串表示首次启动或无设置
                 string savedValue = FileHelper.ReadIniValue("Settings", ANIMATION_SETTING_KEY, "");
 
+                bool isEnabled;
                 if (string.IsNullOrEmpty(savedValue))
                 {
-                    bool systemValue = SystemParametersInfoHelper.GetAnimationEnabled();
-                    FileHelper.WriteIniValue("Settings", ANIMATION_SETTING_KEY, systemValue.ToString().ToLower());
-
-                    _isProcessingToggle = true;
-                    AnimationToggleSwitch.IsOn = systemValue;
+                    // 无保存的设置时使用默认值
+                    isEnabled = DEFAULT_ANIMATION_STATE;
+                    // 同时将默认值保存到配置文件
+                    FileHelper.WriteIniValue("Settings", ANIMATION_SETTING_KEY, isEnabled.ToString().ToLower());
                 }
                 else
                 {
-
-                    bool isEnabled = bool.Parse(savedValue);
-
-                    _isProcessingToggle = true;
-                    AnimationToggleSwitch.IsOn = isEnabled;
+                    // 尝试解析保存的设置值
+                    if (!bool.TryParse(savedValue, out isEnabled))
+                    {
+                        // 解析失败时使用默认值
+                        isEnabled = DEFAULT_ANIMATION_STATE;
+                        FileHelper.WriteIniValue("Settings", ANIMATION_SETTING_KEY, isEnabled.ToString().ToLower());
+                    }
                 }
 
+                // 应用最终确定的状态
+                _isProcessingToggle = true;
+                AnimationToggleSwitch.IsOn = isEnabled;
                 _isProcessingToggle = false;
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"加载动画设置失败: {ex.Message}");
-                AnimationToggleSwitch.IsOn = true;
+                // 任何异常情况下都使用默认打开状态
+                _isProcessingToggle = true;
+                AnimationToggleSwitch.IsOn = DEFAULT_ANIMATION_STATE;
                 _isProcessingToggle = false;
             }
         }
@@ -71,9 +81,9 @@ namespace SystemInfoViewer
             }
             catch (Exception ex)
             {
-                // 发生错误时恢复开关状态
+                // 发生错误时恢复到默认打开状态
                 _isProcessingToggle = true;
-                AnimationToggleSwitch.IsOn = !AnimationToggleSwitch.IsOn;
+                AnimationToggleSwitch.IsOn = DEFAULT_ANIMATION_STATE;
                 _isProcessingToggle = false;
 
                 // 显示错误信息对话框
@@ -108,18 +118,16 @@ namespace SystemInfoViewer
                 {
                     string iniPath = FileHelper.GetSetupIniPath();
 
-                    // 删除配置文件
                     if (File.Exists(iniPath))
                     {
                         File.Delete(iniPath);
                     }
 
-                    // 重启应用
+                    // 重启应用后会使用默认打开状态
                     RestartApp();
                 }
                 catch (Exception ex)
                 {
-                    // 显示错误信息
                     ContentDialog errorDialog = new ContentDialog
                     {
                         Title = "错误",
@@ -134,17 +142,14 @@ namespace SystemInfoViewer
 
         private void RestartApp()
         {
-            // 获取当前应用的路径和文件名
             string currentExePath = Process.GetCurrentProcess().MainModule.FileName;
 
-            // 启动新实例
             Process.Start(new ProcessStartInfo
             {
                 FileName = currentExePath,
                 UseShellExecute = true
             });
 
-            // 关闭当前实例
             Application.Current.Exit();
         }
     }
