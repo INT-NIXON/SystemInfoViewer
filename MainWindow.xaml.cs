@@ -37,7 +37,7 @@ namespace SystemInfoViewer
             InitializeWindow();
             InitializeNavigation();
             LoadSavedTheme();
-            LoadWindowAnimationSetting(); // 加载窗口动画设置
+            LoadWindowAnimationSetting();
             ForceTitleBarUpdate(_isDarkTheme).ConfigureAwait(false);
 
             this.Activated += MainWindow_Activated;
@@ -48,11 +48,9 @@ namespace SystemInfoViewer
         {
             try
             {
-                // 读取保存的设置，默认为启用
                 string savedValue = FileHelper.ReadIniValue("Settings", "WindowAnimationEnabled", "true");
                 bool isEnabled = bool.Parse(savedValue);
 
-                // 应用保存的设置
                 SystemParametersInfoHelper.SetAnimationEnabled(isEnabled);
             }
             catch (Exception ex)

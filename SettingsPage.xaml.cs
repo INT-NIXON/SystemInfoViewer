@@ -25,12 +25,10 @@ namespace SystemInfoViewer
         {
             try
             {
-                // 读取保存的设置，默认为空字符串表示首次启动
                 string savedValue = FileHelper.ReadIniValue("Settings", ANIMATION_SETTING_KEY, "");
 
                 if (string.IsNullOrEmpty(savedValue))
                 {
-                    // 首次启动，使用系统当前设置并保存
                     bool systemValue = SystemParametersInfoHelper.GetAnimationEnabled();
                     FileHelper.WriteIniValue("Settings", ANIMATION_SETTING_KEY, systemValue.ToString().ToLower());
 
@@ -39,7 +37,7 @@ namespace SystemInfoViewer
                 }
                 else
                 {
-                    // 使用保存的设置值
+
                     bool isEnabled = bool.Parse(savedValue);
 
                     _isProcessingToggle = true;
@@ -51,14 +49,11 @@ namespace SystemInfoViewer
             catch (Exception ex)
             {
                 Debug.WriteLine($"加载动画设置失败: {ex.Message}");
-                AnimationToggleSwitch.IsOn = true; // 默认启用
+                AnimationToggleSwitch.IsOn = true;
                 _isProcessingToggle = false;
             }
         }
 
-        /// <summary>
-        /// 窗口动画开关状态变化处理
-        /// </summary>
         private async void AnimationToggleSwitch_Toggled(object sender, RoutedEventArgs e)
         {
             if (_isProcessingToggle)
@@ -93,9 +88,6 @@ namespace SystemInfoViewer
             }
         }
 
-        /// <summary>
-        /// 重置设置按钮点击事件
-        /// </summary>
         private async void DelConfig_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new ContentDialog
@@ -140,9 +132,6 @@ namespace SystemInfoViewer
             }
         }
 
-        /// <summary>
-        /// 重启应用程序
-        /// </summary>
         private void RestartApp()
         {
             // 获取当前应用的路径和文件名
