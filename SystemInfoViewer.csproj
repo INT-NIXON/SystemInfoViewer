@@ -75,6 +75,11 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Content Update="Assets\Logo.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <EmbeddedResource Update="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -123,5 +128,9 @@
     <PublishTrimmed Condition="'$(Configuration)' == 'Debug'">False</PublishTrimmed>
     <PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed>
     <ApplicationIcon>icon.ico</ApplicationIcon>
+	  <!-- This bundles the .NET Core libraries -->
+	  <SelfContained>true</SelfContained>
+	  <!-- This bundles the WinUI3 components -->
+	  <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
   </PropertyGroup>
 </Project>
