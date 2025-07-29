@@ -204,7 +204,6 @@
                             <Setter.Value>
                                 <ControlTemplate TargetType="Button">
                                     <Grid>
-                                        <!-- 视觉状态组必须放在Grid内部 -->
                                         <VisualStateManager.VisualStateGroups>
                                             <VisualStateGroup x:Name="CommonStates">
                                                 <VisualState x:Name="Normal"/>
@@ -225,14 +224,12 @@
                                             </VisualStateGroup>
                                         </VisualStateManager.VisualStateGroups>
 
-                                        <!-- 背景元素 -->
                                         <Border x:Name="Background" 
                             Background="{TemplateBinding Background}"
                             Width="{TemplateBinding Width}"
                             Height="{TemplateBinding Height}"
                             CornerRadius="0"/>
 
-                                        <!-- 内容呈现器 -->
                                         <ContentPresenter x:Name="ContentPresenter"
                                       Content="{TemplateBinding Content}"
                                       HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
