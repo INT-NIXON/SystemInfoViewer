@@ -11,6 +11,26 @@
             <TextBlock Text="设置" 
                       Style="{StaticResource HeaderTextBlockStyle}"/>
 
+            <!-- 窗口动画设置 -->
+            <Border Style="{StaticResource InfoCardStyle}">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="系统" 
+                              Style="{StaticResource SubtitleTextBlockStyle}"/>
+                    <StackPanel Orientation="Horizontal" Spacing="-100">
+                        <ToggleSwitch x:Name="AnimationToggleSwitch" Margin="0,0,0,0"
+                                      HorizontalAlignment="Right"
+                                      VerticalAlignment="Center"
+                                      Toggled="AnimationToggleSwitch_Toggled"
+                                      OffContent=""
+                                 OnContent=""/>
+                        <TextBlock Text="在最大化和最小化时显示窗口动画"
+                                   VerticalAlignment="Center"
+                                   Style="{StaticResource BodyTextBlockStyle}"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- 重置设置 -->
             <Border Style="{StaticResource InfoCardStyle}">
                 <StackPanel Spacing="8">
                     <TextBlock Text="重置" 

@@ -22,7 +22,6 @@ namespace SystemInfoViewer
     public sealed partial class MainWindow : Window
     {
         private const string THEME_SETTING_KEY = "AppTheme";
-        private static bool _originalAnimationEnabled = true;
         private bool _isDarkTheme = false;
         private IntPtr _hWnd;
         private AppWindow _appWindow;
@@ -34,30 +33,31 @@ namespace SystemInfoViewer
         public MainWindow()
         {
             this.InitializeComponent();
-            RestoreWindowAnimation();
             _hWnd = WindowNative.GetWindowHandle(this);
             InitializeWindow();
             InitializeNavigation();
             LoadSavedTheme();
+            LoadWindowAnimationSetting(); // 加载窗口动画设置
             ForceTitleBarUpdate(_isDarkTheme).ConfigureAwait(false);
 
             this.Activated += MainWindow_Activated;
             this.Closed += MainWindow_Closed;
         }
 
-        private void RestoreWindowAnimation()
+        private void LoadWindowAnimationSetting()
         {
             try
             {
-                _originalAnimationEnabled = SystemParametersInfoHelper.GetAnimationEnabled();
-                if (!_originalAnimationEnabled)
-                {
-                    SystemParametersInfoHelper.SetAnimationEnabled(true);
-                }
+                // 读取保存的设置，默认为启用
+                string savedValue = FileHelper.ReadIniValue("Settings", "WindowAnimationEnabled", "true");
+                bool isEnabled = bool.Parse(savedValue);
+
+                // 应用保存的设置
+                SystemParametersInfoHelper.SetAnimationEnabled(isEnabled);
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"恢复窗口动画设置失败: {ex.Message}");
+                Debug.WriteLine($"加载窗口动画设置失败: {ex.Message}");
             }
         }
 
@@ -244,18 +244,6 @@ namespace SystemInfoViewer
         {
             _timer?.Stop();
             _timer = null;
-
-            try
-            {
-                if (!_originalAnimationEnabled)
-                {
-                    SystemParametersInfoHelper.SetAnimationEnabled(false);
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"恢复原始窗口动画设置失败: {ex.Message}");
-            }
         }
 
         private void SetWindowSize(int width, int height)
