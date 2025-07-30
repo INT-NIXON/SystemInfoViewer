@@ -17,8 +17,8 @@
         <Grid x:Name="CustomTitleBar" Grid.Row="0" 
               Background="{ThemeResource TitleBarBackgroundBrush}"
               PointerPressed="CustomTitleBar_PointerPressed"
-     PointerMoved="CustomTitleBar_PointerMoved"
-       PointerReleased="CustomTitleBar_PointerReleased">
+              PointerMoved="CustomTitleBar_PointerMoved"
+              PointerReleased="CustomTitleBar_PointerReleased">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>

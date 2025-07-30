@@ -10,14 +10,14 @@
         <StackPanel Spacing="12">
             <TextBlock Text="设置" 
                       Style="{StaticResource HeaderTextBlockStyle}"/>
-            
+
             <!-- 个性化设置卡片 -->
             <Border Style="{StaticResource InfoCardStyle}">
                 <StackPanel Spacing="8">
                     <TextBlock Text="个性化" 
                   Style="{StaticResource SubtitleTextBlockStyle}"/>
-                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                        <TextBlock Text="主题模式:" 
+                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0" Spacing="-50">
+                        <TextBlock Text="主题:" 
                        VerticalAlignment="Center"
                        Style="{StaticResource BodyTextBlockStyle}"
                        Width="100"/>
@@ -28,6 +28,14 @@
                             <ComboBoxItem Tag="Dark">深色</ComboBoxItem>
                             <ComboBoxItem Tag="System">跟随系统</ComboBoxItem>
                         </ComboBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0" Spacing="-90">
+                        <CheckBox x:Name="HideThemeButtonCheckBox"
+                                  Checked="HideThemeButtonCheckBox_Checked"
+                                  Unchecked="HideThemeButtonCheckBox_Unchecked"/>
+                        <TextBlock Text="隐藏侧边栏主题切换按钮"
+           VerticalAlignment="Center"
+           Style="{StaticResource BodyTextBlockStyle}"/>
                     </StackPanel>
                 </StackPanel>
             </Border>

@@ -12,6 +12,8 @@ namespace SystemInfoViewer
     {
         private const string ANIMATION_SETTING_KEY = "WindowAnimationEnabled";
         private const string THEME_SETTING_KEY = "CurrentTheme";
+        private const string HIDE_THEME_BUTTON_KEY = "HideThemeButton";
+
         private bool _isProcessingToggle = false;
         private bool _isUpdatingFromCode = false;
         private const bool DEFAULT_ANIMATION_STATE = true;
@@ -21,27 +23,23 @@ namespace SystemInfoViewer
             InitializeComponent();
             LoadAnimationSetting();
             LoadThemeSetting();
+            LoadHideThemeButtonSetting();
 
-            // 监听系统主题变化
             var uiSettings = new UISettings();
             uiSettings.ColorValuesChanged += UiSettings_ColorValuesChanged;
 
-            // 监听主窗口主题变化，同步下拉框
             if (App.MainWindow != null)
             {
                 App.MainWindow.ThemeChanged += MainWindow_ThemeChanged;
             }
         }
 
-        // 从配置加载主题
         private void LoadThemeSetting()
         {
             try
             {
-                // 读取配置，默认值为system
                 string savedTheme = FileHelper.ReadIniValue("Theme", THEME_SETTING_KEY, "system").ToLower();
 
-                // 根据配置选中下拉框选项
                 switch (savedTheme)
                 {
                     case "light":
@@ -50,7 +48,7 @@ namespace SystemInfoViewer
                     case "dark":
                         ThemeComboBox.SelectedIndex = 1;
                         break;
-                    default: // system或其他值
+                    default:
                         ThemeComboBox.SelectedIndex = 2;
                         break;
                 }
@@ -58,11 +56,10 @@ namespace SystemInfoViewer
             catch (Exception ex)
             {
                 Debug.WriteLine($"加载主题设置失败: {ex.Message}");
-                ThemeComboBox.SelectedIndex = 2; // 默认跟随系统
+                ThemeComboBox.SelectedIndex = 2;
             }
         }
 
-        // 下拉框选择变化时更新主题和配置
         private void ThemeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (_isUpdatingFromCode) return;
@@ -71,23 +68,18 @@ namespace SystemInfoViewer
             {
                 string theme = selectedItem.Tag.ToString().ToLower();
 
-                // 保存到配置
                 FileHelper.WriteIniValue("Theme", THEME_SETTING_KEY, theme);
 
-                // 更新应用主题
                 UpdateAppTheme(theme);
             }
         }
 
-        // 主窗口主题变化时同步下拉框
         private void MainWindow_ThemeChanged(ElementTheme newTheme)
         {
             _isUpdatingFromCode = true;
 
-            // 获取当前保存的主题设置
             string savedTheme = FileHelper.ReadIniValue("Theme", THEME_SETTING_KEY, "system").ToLower();
 
-            // 根据保存的主题类型更新下拉框
             switch (savedTheme)
             {
                 case "light":
@@ -96,7 +88,7 @@ namespace SystemInfoViewer
                 case "dark":
                     ThemeComboBox.SelectedIndex = 1;
                     break;
-                default: // system
+                default:
                     ThemeComboBox.SelectedIndex = 2;
                     break;
             }
@@ -104,7 +96,6 @@ namespace SystemInfoViewer
             _isUpdatingFromCode = false;
         }
 
-        // 根据主题字符串更新应用主题
         private void UpdateAppTheme(string theme)
         {
             if (App.MainWindow != null)
@@ -113,21 +104,65 @@ namespace SystemInfoViewer
                 {
                     "light" => ElementTheme.Light,
                     "dark" => ElementTheme.Dark,
-                    _ => ElementTheme.Default // system对应Default
+                    _ => ElementTheme.Default
                 };
 
-                // 应用主题
                 App.MainWindow.ApplyTheme(targetTheme);
             }
         }
 
-        // 系统主题变化时（仅在跟随系统模式下生效）
         private void UiSettings_ColorValuesChanged(UISettings sender, object args)
         {
             string currentTheme = FileHelper.ReadIniValue("Theme", THEME_SETTING_KEY, "system").ToLower();
             if (currentTheme == "system")
             {
                 UpdateAppTheme("system");
+            }
+        }
+
+        private void LoadHideThemeButtonSetting()
+        {
+            try
+            {
+                string savedValue = FileHelper.ReadIniValue("UI", HIDE_THEME_BUTTON_KEY, "false");
+                bool isHidden = bool.Parse(savedValue);
+                HideThemeButtonCheckBox.IsChecked = isHidden;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"加载主题按钮显示配置失败: {ex.Message}");
+                HideThemeButtonCheckBox.IsChecked = false;
+            }
+        }
+
+        private void HideThemeButtonCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            SaveHideThemeButtonSetting(true);
+        }
+
+        private void HideThemeButtonCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            SaveHideThemeButtonSetting(false);
+        }
+
+        private void SaveHideThemeButtonSetting(bool isHidden)
+        {
+            try
+            {
+                FileHelper.WriteIniValue("UI", HIDE_THEME_BUTTON_KEY, isHidden.ToString().ToLower());
+                UpdateThemeButtonVisibility(isHidden);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"保存主题按钮显示配置失败: {ex.Message}");
+            }
+        }
+
+        private void UpdateThemeButtonVisibility(bool isHidden)
+        {
+            if (App.MainWindow != null && App.MainWindow.ThemeSwitchButton != null)
+            {
+                App.MainWindow.ThemeSwitchButton.Visibility = isHidden ? Visibility.Collapsed : Visibility.Visible;
             }
         }
 
