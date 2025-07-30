@@ -75,6 +75,7 @@
                     <Style x:Key="CaptionTextBlockStyle" TargetType="TextBlock">
                         <Setter Property="FontFamily" Value="{StaticResource HarmonyBoldFont}"/>
                         <Setter Property="FontSize" Value="12"/>
+                        <Setter Property="FontWeight" Value="Bold"/>
                         <Setter Property="Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}"/>
                     </Style>
 
@@ -86,12 +87,13 @@
 
                     <Style x:Key="SubtitleTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextStyle}">
                         <Setter Property="FontSize" Value="18"/>
-                        <Setter Property="FontWeight" Value="SemiBold"/>
+                        <Setter Property="FontWeight" Value="Bold"/>
                         <Setter Property="Margin" Value="0,0,0,8"/>
                     </Style>
 
                     <Style x:Key="BodyTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextStyle}">
                         <Setter Property="FontSize" Value="14"/>
+                        <Setter Property="FontWeight" Value="Bold"/>
                     </Style>
 
                     <Style x:Key="BaseTextStyle" TargetType="TextBlock">

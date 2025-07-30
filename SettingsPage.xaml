@@ -11,6 +11,13 @@
             <TextBlock Text="设置" 
                       Style="{StaticResource HeaderTextBlockStyle}"/>
 
+            <Border Style="{StaticResource InfoCardStyle}">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="个性化" 
+                  Style="{StaticResource SubtitleTextBlockStyle}"/>
+                </StackPanel>
+            </Border>
+
             <!-- 窗口动画设置 -->
             <Border Style="{StaticResource InfoCardStyle}">
                 <StackPanel Spacing="8">
