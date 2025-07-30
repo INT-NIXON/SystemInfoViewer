@@ -16,9 +16,6 @@ using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace SystemInfoViewer
 {
     /// <summary>
@@ -27,6 +24,9 @@ namespace SystemInfoViewer
     public partial class App : Application
     {
         private Window? _window;
+
+        // 添加静态属性用于访问主窗口
+        public static MainWindow? MainWindow { get; private set; }
 
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
@@ -43,7 +43,9 @@ namespace SystemInfoViewer
         /// <param name="args">Details about the launch request and process.</param>
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
-            _window = new MainWindow();
+            // 将窗口实例赋值给静态属性
+            MainWindow = new MainWindow();
+            _window = MainWindow;
             _window.Activate();
         }
     }

@@ -10,11 +10,25 @@
         <StackPanel Spacing="12">
             <TextBlock Text="设置" 
                       Style="{StaticResource HeaderTextBlockStyle}"/>
-
+            
+            <!-- 个性化设置卡片 -->
             <Border Style="{StaticResource InfoCardStyle}">
                 <StackPanel Spacing="8">
                     <TextBlock Text="个性化" 
                   Style="{StaticResource SubtitleTextBlockStyle}"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                        <TextBlock Text="主题模式:" 
+                       VerticalAlignment="Center"
+                       Style="{StaticResource BodyTextBlockStyle}"
+                       Width="100"/>
+                        <ComboBox x:Name="ThemeComboBox" 
+                      Width="200"
+                      SelectionChanged="ThemeComboBox_SelectionChanged">
+                            <ComboBoxItem Tag="Light">浅色</ComboBoxItem>
+                            <ComboBoxItem Tag="Dark">深色</ComboBoxItem>
+                            <ComboBoxItem Tag="System">跟随系统</ComboBoxItem>
+                        </ComboBox>
+                    </StackPanel>
                 </StackPanel>
             </Border>
 
