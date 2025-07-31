@@ -70,7 +70,7 @@
                         <TextBlock Grid.Row="1" Grid.Column="0" Text="内存:" Style="{StaticResource BodyTextBlockStyle}"/>
                         <TextBlock x:Name="MemoryText" Grid.Row="1" Grid.Column="1" Style="{StaticResource BodyTextBlockStyle}"/>
 
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="磁盘:" FontFamily="HarmonyOS Sans SC"/>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="磁盘:" FontFamily="/Assets/Fonts/MiSans-Medium.ttf#MiSans"/>
                         <TextBlock x:Name="DiskInfoText" Grid.Row="2" Grid.Column="1" Style="{StaticResource BodyTextBlockStyle}"/>
                     </Grid>
                 </StackPanel>

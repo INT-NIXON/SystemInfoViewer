@@ -67,7 +67,7 @@ namespace SystemInfoViewer
         {
             if (element is TextBlock textBlock)
             {
-                textBlock.FontFamily = (FontFamily)Application.Current.Resources["HarmonyBoldFont"];
+                textBlock.FontFamily = (FontFamily)Application.Current.Resources["MiSansFont"];
             }
         }
 

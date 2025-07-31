@@ -67,37 +67,45 @@
                     </ResourceDictionary.ThemeDictionaries>
 
                     <!-- 字体定义 -->
-                    <FontFamily x:Key="HarmonyBoldFont">
-                        ms-appx:///Assets/Fonts/HarmonyOS_Sans_Bold.ttf#HarmonyOS Sans SC
+                    <FontFamily x:Key="MiSansFont">
+                        ms-appx:///Assets/Fonts/MiSans-Medium.ttf#MiSans
                     </FontFamily>
+                    
+                    <!-- ComboBox 全局样式 -->
+                    <Style TargetType="ComboBox">
+                        <Setter Property="FontFamily" Value="{StaticResource MiSansFont}"/>
+                        <Setter Property="CornerRadius" Value="4"/>
+                    </Style>
 
+                    <!-- Button 全局样式 -->
+                    <Style TargetType="Button">
+                        <Setter Property="FontFamily" Value="{StaticResource MiSansFont}"/>
+                        <Setter Property="CornerRadius" Value="4"/>
+                    </Style>
+                    
                     <!-- 文本样式 -->
                     <Style x:Key="CaptionTextBlockStyle" TargetType="TextBlock">
-                        <Setter Property="FontFamily" Value="{StaticResource HarmonyBoldFont}"/>
+                        <Setter Property="FontFamily" Value="{StaticResource MiSansFont}"/>
                         <Setter Property="FontSize" Value="12"/>
-                        <Setter Property="FontWeight" Value="Bold"/>
                         <Setter Property="Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}"/>
                     </Style>
 
                     <Style x:Key="HeaderTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextStyle}">
                         <Setter Property="FontSize" Value="28"/>
-                        <Setter Property="FontWeight" Value="Bold"/>
                         <Setter Property="Margin" Value="0,0,0,16"/>
                     </Style>
 
                     <Style x:Key="SubtitleTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextStyle}">
                         <Setter Property="FontSize" Value="18"/>
-                        <Setter Property="FontWeight" Value="Bold"/>
                         <Setter Property="Margin" Value="0,0,0,8"/>
                     </Style>
 
                     <Style x:Key="BodyTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextStyle}">
                         <Setter Property="FontSize" Value="14"/>
-                        <Setter Property="FontWeight" Value="Bold"/>
                     </Style>
 
                     <Style x:Key="BaseTextStyle" TargetType="TextBlock">
-                        <Setter Property="FontFamily" Value="{StaticResource HarmonyBoldFont}"/>
+                        <Setter Property="FontFamily" Value="{StaticResource MiSansFont}"/>
                         <Setter Property="Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}"/>
                         <Setter Property="VerticalAlignment" Value="Center"/>
                     </Style>
@@ -117,7 +125,7 @@
                         <Setter Property="Background" Value="{ThemeResource ButtonBackgroundBrush}"/>
                         <Setter Property="BorderBrush" Value="Transparent"/>
                         <Setter Property="Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}"/>
-                        <Setter Property="FontFamily" Value="{StaticResource HarmonyBoldFont}"/>
+                        <Setter Property="FontFamily" Value="{StaticResource MiSansFont}"/>
                         <Setter Property="HorizontalAlignment" Value="Stretch"/>
                         <Setter Property="HorizontalContentAlignment" Value="Left"/>
                         <Setter Property="Padding" Value="12,8"/>
@@ -293,7 +301,7 @@
                     <Style x:Key="AccentButtonStyle" TargetType="Button">
                         <Setter Property="Background" Value="{ThemeResource SystemAccentColor}"/>
                         <Setter Property="Foreground" Value="White"/>
-                        <Setter Property="FontFamily" Value="{StaticResource HarmonyBoldFont}"/>
+                        <Setter Property="FontFamily" Value="{StaticResource MiSansFont}"/>
                         <Setter Property="Padding" Value="12,8"/>
                         <Setter Property="CornerRadius" Value="4"/>
                         <Setter Property="HorizontalAlignment" Value="Left"/>
