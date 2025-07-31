@@ -49,7 +49,6 @@ namespace SystemInfoViewer
 
         private void ApplyHarmonyFont()
         {
-            // 设置所有数据显示的TextBlock字体
             SetFontForElement(OSVersionText);
             SetFontForElement(OSArchitectureText);
             SetFontForElement(ComputerNameText);
@@ -57,6 +56,7 @@ namespace SystemInfoViewer
             SetFontForElement(ProcessorText);
             SetFontForElement(MemoryText);
             SetFontForElement(DiskInfoText);
+            SetFontForElement(GpuInfoText);
             SetFontForElement(MemoryUsageText);
             SetFontForElement(BootTimeText);
             SetFontForElement(CurrentTimeText);
@@ -77,39 +77,32 @@ namespace SystemInfoViewer
 
             try
             {
-                // 显示加载状态
                 ShowLoadingIndicators();
 
-                // 在后台线程执行WMI查询
                 await Task.Run(() =>
                 {
                     if (_isDisposed) return;
 
                     try
                     {
-                        // 合并系统信息查询
                         GetSystemBasicInfo();
 
-                        // 获取处理器信息
                         GetProcessorInfo();
 
-                        // 获取内存信息
                         GetMemoryInfo();
 
-                        // 获取磁盘信息
                         GetDiskInfo();
 
-                        // 获取系统启动时间
+                        GetGpuInfo();
+
                         GetSystemBootTime();
                     }
                     catch (Exception ex)
                     {
                         Debug.WriteLine($"初始化系统信息失败: {ex.Message}");
-                        // 可以在这里设置错误状态
                     }
                 });
 
-                // 在UI线程更新界面
                 this.DispatcherQueue.TryEnqueue(() =>
                 {
                     if (!_isDisposed)
@@ -117,7 +110,6 @@ namespace SystemInfoViewer
                         UpdateSystemInfoUI();
                         HideLoadingIndicators();
 
-                        // 首次加载完成后更新内存使用情况
                         if (_isFirstLoad && !_isDisposed)
                         {
                             UpdateMemoryUsage();
@@ -134,7 +126,6 @@ namespace SystemInfoViewer
 
         private void ShowLoadingIndicators()
         {
-            // 可以实现显示加载指示器的逻辑
             if (!_isDisposed && OSVersionText != null)
             {
                 OSVersionText.Text = "加载中...";
@@ -144,6 +135,7 @@ namespace SystemInfoViewer
                 ProcessorText.Text = "加载中...";
                 MemoryText.Text = "加载中...";
                 DiskInfoText.Text = "加载中...";
+                GpuInfoText.Text = "加载中...";
                 MemoryUsageText.Text = "加载中...";
                 BootTimeText.Text = "加载中...";
                 CurrentTimeText.Text = "加载中...";
@@ -250,6 +242,64 @@ namespace SystemInfoViewer
             }
         }
 
+        private void GetGpuInfo()
+        {
+            if (_isDisposed) return;
+
+            if (!_systemInfoCache.ContainsKey("GpuInfo"))
+            {
+                try
+                {
+                    var gpuInfo = new System.Text.StringBuilder();
+                    using (var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_VideoController"))
+                    {
+                        foreach (ManagementObject gpu in searcher.Get())
+                        {
+                            string name = gpu["Name"]?.ToString()?.Trim() ?? "未知显卡";
+
+                            string vram = "未知";
+                            if (gpu["AdapterRAM"] != null)
+                            {
+                                try
+                                {
+                                    ulong vramBytes = Convert.ToUInt64(gpu["AdapterRAM"]);
+                                    double vramGB = Math.Round(vramBytes / (1024.0 * 1024 * 1024), 1);
+                                    vram = $"{vramGB} GB";
+                                }
+                                catch { }
+                            }
+
+                            string driverVersion = gpu["DriverVersion"]?.ToString() ?? "未知";
+
+                            gpuInfo.AppendLine($"{name} | 显存: {vram} | 驱动: {driverVersion}");
+                        }
+                    }
+
+                    if (gpuInfo.Length == 0)
+                    {
+                        gpuInfo.AppendLine("未检测到显卡信息");
+                    }
+
+                    _systemInfoCache["GpuInfo"] = gpuInfo.ToString().Trim();
+
+                    this.DispatcherQueue.TryEnqueue(() =>
+                    {
+                        if (!_isDisposed && GpuLabelText != null && GpuInfoText != null)
+                        {
+                            var margin = new Thickness(0, -25, 0, 0); 
+                            GpuLabelText.Margin = margin;
+                            GpuInfoText.Margin = margin;
+                        }
+                    });
+                }
+                catch (Exception ex)
+                {
+                    _systemInfoCache["GpuInfo"] = "获取显卡信息失败";
+                    Debug.WriteLine($"获取显卡信息失败: {ex.Message}");
+                }
+            }
+        }
+
         private void GetSystemBootTime()
         {
             if (_isDisposed) return;
@@ -301,6 +351,9 @@ namespace SystemInfoViewer
             if (DiskInfoText != null)
                 DiskInfoText.Text = _systemInfoCache.ContainsKey("DiskInfo") ? _systemInfoCache["DiskInfo"].ToString() : "未知";
 
+            if (GpuInfoText != null)
+                GpuInfoText.Text = _systemInfoCache.ContainsKey("GpuInfo") ? _systemInfoCache["GpuInfo"].ToString() : "未知";
+
             if (BootTimeText != null)
                 BootTimeText.Text = _systemInfoCache.ContainsKey("BootTime") ? _systemInfoCache["BootTime"].ToString() : "未知";
         }
@@ -319,21 +372,18 @@ namespace SystemInfoViewer
         {
             if (_isDisposed) return;
 
-            // 更新当前时间
             var now = DateTime.Now;
             if (CurrentTimeText != null)
             {
                 CurrentTimeText.Text = now.ToString("yyyy-MM-dd HH:mm:ss");
             }
 
-            // 更新运行时间
             if (_bootTime != DateTime.MinValue && UptimeText != null)
             {
                 var uptime = now - _bootTime;
                 UptimeText.Text = $"{uptime.Days}天 {uptime.Hours}小时 {uptime.Minutes}分 {uptime.Seconds}秒";
             }
 
-            // 每秒更新一次内存使用情况
             UpdateMemoryUsage();
         }
 
@@ -361,7 +411,6 @@ namespace SystemInfoViewer
                                 var usedMemoryGB = Math.Round(usedMemoryKB / 1024.0 / 1024, 1);
                                 var usagePercent = Math.Round((usedMemoryKB / (double)totalMemoryKB) * 100, 1);
 
-                                // 更新UI前检查是否已释放
                                 this.DispatcherQueue.TryEnqueue(() =>
                                 {
                                     if (!_isDisposed && MemoryUsageText != null)

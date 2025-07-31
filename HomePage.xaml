@@ -62,6 +62,7 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
                         <TextBlock Grid.Row="0" Grid.Column="0" Text="处理器:" Style="{StaticResource BodyTextBlockStyle}"/>
@@ -71,7 +72,10 @@
                         <TextBlock x:Name="MemoryText" Grid.Row="1" Grid.Column="1" Style="{StaticResource BodyTextBlockStyle}"/>
 
                         <TextBlock Grid.Row="2" Grid.Column="0" Text="磁盘:" FontFamily="/Assets/Fonts/MiSans-Medium.ttf#MiSans"/>
-                        <TextBlock x:Name="DiskInfoText" Grid.Row="2" Grid.Column="1" Style="{StaticResource BodyTextBlockStyle}"/>
+                        <TextBlock x:Name="DiskInfoText" Grid.Row="2" Grid.Column="1" Style="{StaticResource BodyTextBlockStyle}" Margin="0,-1,0,4"/>
+
+                        <TextBlock x:Name="GpuLabelText" Grid.Row="3" Grid.Column="0" Text="显卡:" FontFamily="/Assets/Fonts/MiSans-Medium.ttf#MiSans"/>
+                        <TextBlock x:Name="GpuInfoText" Grid.Row="3" Grid.Column="1" Style="{StaticResource BodyTextBlockStyle}"/>
                     </Grid>
                 </StackPanel>
             </Border>
