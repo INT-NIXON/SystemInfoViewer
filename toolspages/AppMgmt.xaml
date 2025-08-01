@@ -50,35 +50,50 @@
                            Margin="0"/>
             </StackPanel>
 
-            <!-- 搜索和刷新区域 -->
-            <Grid Margin="0,0,0,10" ColumnSpacing="12">
+            <!-- 搜索、应用总数和刷新区域 -->
+            <Grid Margin="0,0,0,16" ColumnSpacing="12">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- 自适应宽度的搜索框 -->
-                <TextBox 
-                    x:Name="SearchBox"
-                    PlaceholderText="搜索应用..."
-                    TextChanged="SearchBox_TextChanged"
-                    HorizontalAlignment="Stretch"
-                    FontSize="14"
-                    FontFamily="/Assets/Fonts/MiSans-Medium.ttf#MiSans"
-                    Padding="12,8"
-                    CornerRadius="4"
-                    BorderThickness="1"
-                    BorderBrush="{ThemeResource CardBorderBrush}"
-                    Background="{ThemeResource CardBackgroundBrush}"/>
+                <!-- 带应用总数的搜索框 -->
+                <Grid>
+                    <TextBox 
+                        x:Name="SearchBox"
+                        PlaceholderText="搜索应用..."
+                        TextChanged="SearchBox_TextChanged"
+                        HorizontalAlignment="Stretch"
+                        FontSize="14"
+                        Padding="12,8"
+                        CornerRadius="4"
+                        BorderThickness="1"
+                        BorderBrush="{ThemeResource CardBorderBrush}"
+                        Background="{ThemeResource CardBackgroundBrush}"/>
+
+                    <!-- 应用总数显示 -->
+                    <TextBlock 
+                        x:Name="TotalCountText"
+                        Text="共 0 个应用"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Right"
+                        Margin="0,0,12,0"
+                        IsHitTestVisible="False"/>
+                </Grid>
 
                 <Button 
                     x:Name="RefreshButton"
                     Grid.Column="1"
                     Click="RefreshButton_Click"
-                    HorizontalAlignment="Left">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <SymbolIcon Symbol="Refresh" />
-                        <TextBlock Text="刷新" />
+                    HorizontalAlignment="Left"
+                    Height="{Binding ActualHeight, ElementName=SearchBox}"
+                    MinWidth="100"
+                    Padding="12,0">
+                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <SymbolIcon Symbol="Refresh"/>
+                        <TextBlock Text="刷新" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
             </Grid>
@@ -139,12 +154,12 @@
                                     Style="{StaticResource BodyTextBlockStyle}"
                                     VerticalAlignment="Center"/>
 
-                                <!-- 卸载按钮 - 使用新增的辅助属性判断是否启用 -->
+                                <!-- 卸载按钮 -->
                                 <Button 
                                     Grid.Column="3"
                                     Content="卸载" 
                                     Click="UninstallButton_Click"
-                                    Tag="{x:Bind UninstallString}"
+                                    Tag="{x:Bind UninstallString, FallbackValue='', TargetNullValue=''}"
                                     DataContext="{x:Bind}"
                                     IsEnabled="{x:Bind HasUninstallString}"
                                     HorizontalAlignment="Right"/>
@@ -157,3 +172,4 @@
         </StackPanel>
     </ScrollViewer>
 </Page>
+    
