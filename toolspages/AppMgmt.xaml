@@ -98,20 +98,31 @@
                 </Button>
             </Grid>
 
-            <!-- 加载指示器 -->
-            <StackPanel x:Name="LoadingIndicator" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <ProgressRing IsActive="True" Width="40" Height="40"/>
-                <TextBlock Text="正在加载已安装的应用..." Style="{StaticResource BodyTextBlockStyle}" Margin="0,8,0,0"/>
-            </StackPanel>
+            <Grid MinHeight="400">
+                <!-- 加载指示器 -->
+                <StackPanel x:Name="LoadingIndicator" Visibility="Collapsed" 
+                            HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <ProgressRing IsActive="True" Width="40" Height="40"/>
+                    <TextBlock Text="正在加载已安装的应用..." 
+                               Style="{StaticResource BodyTextBlockStyle}" 
+                               Margin="0,8,0,0"
+                               TextAlignment="Center"/>
+                </StackPanel>
 
-            <!-- 空状态 -->
-            <StackPanel x:Name="EmptyState" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <TextBlock Text="未找到应用程序" Style="{StaticResource SubtitleTextBlockStyle}"/>
-                <TextBlock Text="尝试刷新列表或检查系统设置" Style="{StaticResource BodyTextBlockStyle}" 
-                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-            </StackPanel>
+                <!-- 空状态 -->
+                <StackPanel x:Name="EmptyState" Visibility="Collapsed" 
+                            HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock Text="未找到应用程序" 
+                               Style="{StaticResource SubtitleTextBlockStyle}"
+                               TextAlignment="Center"/>
+                    <TextBlock Text="尝试刷新列表或检查系统设置" 
+                               Style="{StaticResource BodyTextBlockStyle}" 
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               TextAlignment="Center"
+                               Margin="0,8,0,0"/>
+                </StackPanel>
 
-            <!-- 应用列表 -->
+                <!-- 应用列表 -->
             <ListView 
                 x:Name="SoftwareList"
                 Visibility="Collapsed"
@@ -169,6 +180,7 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
+            </Grid>
         </StackPanel>
     </ScrollViewer>
 </Page>
