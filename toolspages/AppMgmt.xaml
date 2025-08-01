@@ -4,12 +4,13 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:helpers="using:SystemInfoViewer.Helpers"
     mc:Ignorable="d">
 
-    <ScrollViewer Padding="16" VerticalScrollBarVisibility="Auto" Background="{ThemeResource SystemControlBackgroundAltHighBrush}">
+    <ScrollViewer Padding="16" VerticalScrollBarVisibility="Auto">
         <StackPanel Spacing="16">
-            <!-- 标题栏：工具 > 应用管理 -->
-            <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,0,0,24">
+            <!-- 导航路径 -->
+            <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,0,0,10">
                 <Button 
                     Click="ToolsLink_Click"
                     Padding="0"
@@ -49,12 +50,110 @@
                            Margin="0"/>
             </StackPanel>
 
-            <!-- 应用管理页面内容 -->
-            <Border Style="{StaticResource InfoCardStyle}">
-                <TextBlock Text="应用管理" 
-                           Style="{StaticResource BodyTextBlockStyle}"/>
-            </Border>
+            <!-- 搜索和刷新区域 -->
+            <Grid Margin="0,0,0,10" ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- 自适应宽度的搜索框 -->
+                <TextBox 
+                    x:Name="SearchBox"
+                    PlaceholderText="搜索应用..."
+                    TextChanged="SearchBox_TextChanged"
+                    HorizontalAlignment="Stretch"
+                    FontSize="14"
+                    FontFamily="/Assets/Fonts/MiSans-Medium.ttf#MiSans"
+                    Padding="12,8"
+                    CornerRadius="4"
+                    BorderThickness="1"
+                    BorderBrush="{ThemeResource CardBorderBrush}"
+                    Background="{ThemeResource CardBackgroundBrush}"/>
+
+                <Button 
+                    x:Name="RefreshButton"
+                    Grid.Column="1"
+                    Click="RefreshButton_Click"
+                    HorizontalAlignment="Left">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <SymbolIcon Symbol="Refresh" />
+                        <TextBlock Text="刷新" />
+                    </StackPanel>
+                </Button>
+            </Grid>
+
+            <!-- 加载指示器 -->
+            <StackPanel x:Name="LoadingIndicator" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ProgressRing IsActive="True" Width="40" Height="40"/>
+                <TextBlock Text="正在加载已安装的应用..." Style="{StaticResource BodyTextBlockStyle}" Margin="0,8,0,0"/>
+            </StackPanel>
+
+            <!-- 空状态 -->
+            <StackPanel x:Name="EmptyState" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock Text="未找到应用程序" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                <TextBlock Text="尝试刷新列表或检查系统设置" Style="{StaticResource BodyTextBlockStyle}" 
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+            </StackPanel>
+
+            <!-- 应用列表 -->
+            <ListView 
+                x:Name="SoftwareList"
+                Visibility="Collapsed"
+                Margin="0,8,0,0"
+                ScrollViewer.VerticalScrollBarVisibility="Auto">
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="helpers:SoftwareInfo">
+                        <StackPanel Margin="0,4">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="150"/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="100"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- 应用名称和发布者 -->
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock 
+                                        Text="{x:Bind DisplayName, FallbackValue='未知应用'}" 
+                                        Style="{StaticResource SubtitleTextBlockStyle}" 
+                                        Margin="0"/>
+                                    <TextBlock 
+                                        Text="{x:Bind Publisher, FallbackValue='未知发布者', TargetNullValue='未知发布者'}" 
+                                        Style="{StaticResource CaptionTextBlockStyle}" 
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                </StackPanel>
+
+                                <!-- 版本 -->
+                                <TextBlock 
+                                    Grid.Column="1" 
+                                    Text="{x:Bind Version, FallbackValue='未知版本', TargetNullValue='未知版本'}" 
+                                    Style="{StaticResource BodyTextBlockStyle}"
+                                    VerticalAlignment="Center"/>
+
+                                <!-- 安装日期 -->
+                                <TextBlock 
+                                    Grid.Column="2" 
+                                    Text="{x:Bind FormattedInstallDate, FallbackValue='未知日期', TargetNullValue='未知日期'}" 
+                                    Style="{StaticResource BodyTextBlockStyle}"
+                                    VerticalAlignment="Center"/>
+
+                                <!-- 卸载按钮 - 使用新增的辅助属性判断是否启用 -->
+                                <Button 
+                                    Grid.Column="3"
+                                    Content="卸载" 
+                                    Click="UninstallButton_Click"
+                                    Tag="{x:Bind UninstallString}"
+                                    DataContext="{x:Bind}"
+                                    IsEnabled="{x:Bind HasUninstallString}"
+                                    HorizontalAlignment="Right"/>
+                            </Grid>
+                            <Border Height="1" Background="{ThemeResource CardBorderBrush}" Margin="0,8,0,0"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
         </StackPanel>
     </ScrollViewer>
 </Page>
-    

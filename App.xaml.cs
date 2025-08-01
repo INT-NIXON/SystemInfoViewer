@@ -1,25 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
-using Microsoft.UI.Xaml.Shapes;
-using Windows.ApplicationModel;
-using Windows.ApplicationModel.Activation;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
+using System;
+using System.Diagnostics;
 
 namespace SystemInfoViewer
 {
     /// <summary>
-    /// Provides application-specific behavior to supplement the default Application class.
+    /// 提供应用程序特定行为以补充默认的 Application 类。
     /// </summary>
     public partial class App : Application
     {
@@ -29,18 +16,56 @@ namespace SystemInfoViewer
         public static MainWindow? MainWindow { get; private set; }
 
         /// <summary>
-        /// Initializes the singleton application object.  This is the first line of authored code
-        /// executed, and as such is the logical equivalent of main() or WinMain().
+        /// 初始化单例应用程序对象。这是编写的代码的第一行执行，
+        /// 因此是 main() 或 WinMain() 的逻辑等效项。
         /// </summary>
         public App()
         {
-            InitializeComponent();
+            this.InitializeComponent();
+
+            // 注册全局异常处理
+            this.UnhandledException += App_UnhandledException;
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+        }
+
+        // 明确指定使用 System 命名空间的 UnhandledExceptionEventArgs
+        private void CurrentDomain_UnhandledException(object sender, System.UnhandledExceptionEventArgs e)
+        {
+            var exception = e.ExceptionObject as Exception;
+            if (exception != null)
+            {
+                Debug.WriteLine($"应用程序域未处理异常: {exception.Message}\n{exception.StackTrace}");
+                ShowErrorDialog(exception);
+            }
+        }
+
+        // 明确指定使用 Microsoft.UI.Xaml 命名空间的 UnhandledExceptionEventArgs
+        private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
+        {
+            Debug.WriteLine($"XAML未处理异常: {e.Message}\n{e.Exception.StackTrace}");
+            ShowErrorDialog(e.Exception);
+            e.Handled = true; // 标记为已处理，防止应用崩溃
+        }
+
+        private async void ShowErrorDialog(Exception ex)
+        {
+            if (MainWindow == null) return;
+
+            var dialog = new ContentDialog
+            {
+                Title = "发生错误",
+                Content = $"错误信息: {ex.Message}\n\n堆栈跟踪: {ex.StackTrace?.Substring(0, 500)}",
+                CloseButtonText = "确定",
+                XamlRoot = MainWindow.Content.XamlRoot
+            };
+
+            await dialog.ShowAsync();
         }
 
         /// <summary>
-        /// Invoked when the application is launched.
+        /// 在应用程序启动时调用。
         /// </summary>
-        /// <param name="args">Details about the launch request and process.</param>
+        /// <param name="args">有关启动请求和过程的详细信息。</param>
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
             // 将窗口实例赋值给静态属性
