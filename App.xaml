@@ -24,11 +24,14 @@
                             <SolidColorBrush x:Key="TextFillColorSecondaryBrush" Color="#5E5E5E"/>
                             <SolidColorBrush x:Key="TitleBarBackgroundBrush" Color="#FFFFFFFF"/>
                             <SolidColorBrush x:Key="TitleBarIconForeground" Color="#1A1A1A"/>
-                            
+
                             <!-- 控件颜色 -->
                             <SolidColorBrush x:Key="ButtonBackgroundBrush" Color="Transparent"/>
                             <SolidColorBrush x:Key="ButtonHoverBackgroundBrush" Color="#E8E8E8"/>
                             <SolidColorBrush x:Key="ButtonPressedBackgroundBrush" Color="#D0D0D0"/>
+                            <SolidColorBrush x:Key="CardHoverBackgroundBrush" Color="#F0F0F0"/>
+                            <SolidColorBrush x:Key="CardPressedBackgroundBrush" Color="#E8E8E8"/>
+                            <SolidColorBrush x:Key="CardBorderHighlightBrush" Color="#BCBCBC"/>
 
                             <!-- 卡片颜色 -->
                             <SolidColorBrush x:Key="CardBackgroundBrush" Color="White"/>
@@ -55,6 +58,9 @@
                             <SolidColorBrush x:Key="ButtonBackgroundBrush" Color="Transparent"/>
                             <SolidColorBrush x:Key="ButtonHoverBackgroundBrush" Color="#3A3A3A"/>
                             <SolidColorBrush x:Key="ButtonPressedBackgroundBrush" Color="#505050"/>
+                            <SolidColorBrush x:Key="CardHoverBackgroundBrush" Color="#383838"/>
+                            <SolidColorBrush x:Key="CardPressedBackgroundBrush" Color="#404040"/>
+                            <SolidColorBrush x:Key="CardBorderHighlightBrush" Color="#5E5E5E"/>
 
                             <!-- 卡片颜色 -->
                             <SolidColorBrush x:Key="CardBackgroundBrush" Color="#2D2D2D"/>
@@ -66,11 +72,93 @@
                         </ResourceDictionary>
                     </ResourceDictionary.ThemeDictionaries>
 
+                    <!-- 可点击卡片样式 -->
+                    <Style x:Key="ClickableCardStyle" TargetType="Button">
+                        <Setter Property="Background" Value="{ThemeResource CardBackgroundBrush}"/>
+                        <Setter Property="BorderBrush" Value="{ThemeResource CardBorderBrush}"/>
+                        <Setter Property="BorderThickness" Value="1"/>
+                        <Setter Property="CornerRadius" Value="8"/>
+                        <Setter Property="Padding" Value="16"/>
+                        <Setter Property="Margin" Value="0,0,0,16"/>
+                        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                        <Setter Property="VerticalAlignment" Value="Stretch"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Grid>
+                                        <VisualStateManager.VisualStateGroups>
+                                            <VisualStateGroup x:Name="CommonStates">
+                                                <VisualState x:Name="Normal"/>
+                                                <VisualState x:Name="PointerOver">
+                                                    <Storyboard>
+                                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Background" Storyboard.TargetProperty="Background">
+                                                            <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource CardHoverBackgroundBrush}"/>
+                                                        </ObjectAnimationUsingKeyFrames>
+                                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Background" Storyboard.TargetProperty="BorderBrush">
+                                                            <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource CardBorderHighlightBrush}"/>
+                                                        </ObjectAnimationUsingKeyFrames>
+                                                    </Storyboard>
+                                                </VisualState>
+                                                <VisualState x:Name="Pressed">
+                                                    <Storyboard>
+                                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Background" Storyboard.TargetProperty="Background">
+                                                            <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource CardPressedBackgroundBrush}"/>
+                                                        </ObjectAnimationUsingKeyFrames>
+                                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Background" Storyboard.TargetProperty="BorderBrush">
+                                                            <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource CardBorderHighlightBrush}"/>
+                                                        </ObjectAnimationUsingKeyFrames>
+                                                    </Storyboard>
+                                                </VisualState>
+                                                <VisualState x:Name="Disabled">
+                                                    <Storyboard>
+                                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Background" Storyboard.TargetProperty="Opacity">
+                                                            <DiscreteObjectKeyFrame KeyTime="0" Value="0.5"/>
+                                                        </ObjectAnimationUsingKeyFrames>
+                                                    </Storyboard>
+                                                </VisualState>
+                                            </VisualStateGroup>
+                                        </VisualStateManager.VisualStateGroups>
+
+                                        <Border x:Name="Background" 
+                                                Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                CornerRadius="{TemplateBinding CornerRadius}"/>
+
+                                        <ContentPresenter x:Name="ContentPresenter"
+                                                          Content="{TemplateBinding Content}"
+                                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                          Margin="{TemplateBinding Padding}"
+                                                          HorizontalAlignment="Left"
+                                                          VerticalAlignment="Top"/>
+                                    </Grid>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+
+                    <!-- 标题链接文本样式 -->
+                    <Style x:Key="LinkTextStyle" TargetType="TextBlock">
+                        <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}"/>
+                        <Setter Property="IsHitTestVisible" Value="True"/>
+                        <Setter Property="HorizontalAlignment" Value="Center"/>
+                        <Setter Property="VerticalAlignment" Value="Center"/>
+                        <Setter Property="FontFamily" Value="{StaticResource MiSansFont}"/>
+                        <Setter Property="FontSize" Value="28"/>
+                    </Style>
+
+                    <!-- 配合链接文本使用的容器样式 -->
+                    <Style x:Key="LinkHostStyle" TargetType="Border">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="Margin" Value="0"/>
+                    </Style>
+
                     <!-- 字体定义 -->
                     <FontFamily x:Key="MiSansFont">
                         ms-appx:///Assets/Fonts/MiSans-Medium.ttf#MiSans
                     </FontFamily>
-                    
+
                     <!-- ComboBox 全局样式 -->
                     <Style TargetType="ComboBox">
                         <Setter Property="FontFamily" Value="{StaticResource MiSansFont}"/>
@@ -82,7 +170,7 @@
                         <Setter Property="FontFamily" Value="{StaticResource MiSansFont}"/>
                         <Setter Property="CornerRadius" Value="4"/>
                     </Style>
-                    
+
                     <!-- 文本样式 -->
                     <Style x:Key="CaptionTextBlockStyle" TargetType="TextBlock">
                         <Setter Property="FontFamily" Value="{StaticResource MiSansFont}"/>
@@ -361,3 +449,4 @@
         </ResourceDictionary>
     </Application.Resources>
 </Application>
+    

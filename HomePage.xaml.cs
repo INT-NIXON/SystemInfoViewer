@@ -28,7 +28,6 @@ namespace SystemInfoViewer
         private void HomePage_Loaded(object sender, RoutedEventArgs e)
         {
             _isPageLoaded = true;
-            ApplyHarmonyFont();
             InitializeSystemInfoAsync();
             InitializeTimer();
         }
@@ -38,29 +37,12 @@ namespace SystemInfoViewer
             _isPageLoaded = false;
             _isDisposed = true;
 
-            // Í£Ö¹¶¨Ê±Æ÷
             if (_timer != null && _timer.IsEnabled)
             {
                 _timer.Stop();
                 _timer.Tick -= Timer_Tick;
                 _timer = null;
             }
-        }
-
-        private void ApplyHarmonyFont()
-        {
-            SetFontForElement(OSVersionText);
-            SetFontForElement(OSArchitectureText);
-            SetFontForElement(ComputerNameText);
-            SetFontForElement(UserNameText);
-            SetFontForElement(ProcessorText);
-            SetFontForElement(MemoryText);
-            SetFontForElement(DiskInfoText);
-            SetFontForElement(GpuInfoText);
-            SetFontForElement(MemoryUsageText);
-            SetFontForElement(BootTimeText);
-            SetFontForElement(CurrentTimeText);
-            SetFontForElement(UptimeText);
         }
 
         private void SetFontForElement(UIElement element)

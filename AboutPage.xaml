@@ -27,7 +27,7 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <TextBlock Text="当前版本： 1.0-beta.1" Style="{StaticResource SubtitleTextBlockStyle}" Grid.Row="0"/>
+                        <TextBlock Text="当前版本： 1.0-beta.2" Style="{StaticResource SubtitleTextBlockStyle}" Grid.Row="0"/>
                         <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Grid.Row="1" Grid.ColumnSpan="2">
     <Run Text="最新版本："/>
     <Run x:Name="LatestversionRun" Text="获取中..."/>

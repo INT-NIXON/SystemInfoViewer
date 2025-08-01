@@ -35,11 +35,12 @@
                     </StackPanel>
                 </StackPanel>
             </Border>
+
             <Border Style="{StaticResource InfoCardStyle}">
-            <StackPanel>
-                <TextBlock Text="第三方工具" 
+                <StackPanel>
+                    <TextBlock Text="第三方工具" 
                   Style="{StaticResource SubtitleTextBlockStyle}"/>
-                <StackPanel Orientation="Horizontal" Margin="0,12,0,0" Spacing="12">
+                    <StackPanel Orientation="Horizontal" Margin="0,12,0,0" Spacing="12">
                         <Button Content="打开Geek"
                             Margin="0,12,0,0"
                             HorizontalAlignment="Left"
@@ -49,8 +50,25 @@
                             HorizontalAlignment="Left"
                             Click="Openeverything_Click"/>
                     </StackPanel>
-            </StackPanel>
+                </StackPanel>
             </Border>
+
+            <Button Style="{StaticResource ClickableCardStyle}" Click="OpenAppMgmtPage_Click">
+                <StackPanel Orientation="Horizontal" Spacing="16">
+                    <Viewbox Width="48" Height="48" VerticalAlignment="Top">
+                        <Path Data="M181.333333 170.666667A96 96 0 0 0 85.333333 266.666667v106.666666A96 96 0 0 0 181.333333 469.333333h106.666667A96 96 0 0 0 384 373.333333v-106.666666A96 96 0 0 0 288 170.666667h-106.666667zM149.333333 266.666667a32 32 0 0 1 32-32h106.666667a32 32 0 0 1 32 32v106.666666a32 32 0 0 1-32 32h-106.666667a32 32 0 0 1-32-32v-106.666666zM480 213.333333a32 32 0 0 0 0 64h426.666667a32 32 0 0 0 0-64h-426.666667z m0 128a32 32 0 0 0 0 64h298.666667a32 32 0 0 0 0-64h-298.666667z m-298.666667 213.333334A96 96 0 0 0 85.333333 650.666667v106.666666A96 96 0 0 0 181.333333 853.333333h106.666667A96 96 0 0 0 384 757.333333v-106.666666A96 96 0 0 0 288 554.666667h-106.666667z m-32 96a32 32 0 0 1 32-32h106.666667a32 32 0 0 1 32 32v106.666666a32 32 0 0 1-32 32h-106.666667a32 32 0 0 1-32-32v-106.666666zM480 597.333333a32 32 0 0 0 0 64h426.666667a32 32 0 0 0 0-64h-426.666667z m0 128a32 32 0 0 0 0 64h298.666667a32 32 0 0 0 0-64h-298.666667z"
+                  Fill="{ThemeResource TextFillColorPrimaryBrush}"/>
+                    </Viewbox>
+                    <StackPanel>
+                        <TextBlock Text="应用管理" 
+                      Style="{StaticResource SubtitleTextBlockStyle}"/>
+                        <TextBlock Text="管理已安装的应用程序，查看详细信息并执行相关操作"
+                      Style="{StaticResource BodyTextBlockStyle}"
+                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                    </StackPanel>
+                </StackPanel>
+            </Button>
         </StackPanel>
     </ScrollViewer>
 </Page>
+    

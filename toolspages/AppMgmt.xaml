@@ -1,0 +1,60 @@
+<Page
+    x:Class="SystemInfoViewer.AppMgmt"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <ScrollViewer Padding="16" VerticalScrollBarVisibility="Auto" Background="{ThemeResource SystemControlBackgroundAltHighBrush}">
+        <StackPanel Spacing="16">
+            <!-- 标题栏：工具 > 应用管理 -->
+            <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,0,0,24">
+                <Button 
+                    Click="ToolsLink_Click"
+                    Padding="0"
+                    BorderThickness="0"
+                    Background="Transparent">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Grid>
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup x:Name="CommonStates">
+                                        <VisualState x:Name="Normal"/>
+                                        <VisualState x:Name="PointerOver">
+                                            <Storyboard>
+                                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ToolsLink" Storyboard.TargetProperty="Foreground">
+                                                    <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource TextFillColorPrimaryBrush}"/>
+                                                </ObjectAnimationUsingKeyFrames>
+                                            </Storyboard>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+
+                                <TextBlock 
+                                    x:Name="ToolsLink" 
+                                    Text="工具" 
+                                    Style="{StaticResource LinkTextStyle}"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    IsHitTestVisible="True"/>
+                            </Grid>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+
+                <TextBlock Text=">" 
+                           Style="{StaticResource BodyTextBlockStyle}"/>
+                <TextBlock Text="应用管理" 
+                           Style="{StaticResource HeaderTextBlockStyle}"
+                           Margin="0"/>
+            </StackPanel>
+
+            <!-- 应用管理页面内容 -->
+            <Border Style="{StaticResource InfoCardStyle}">
+                <TextBlock Text="应用管理" 
+                           Style="{StaticResource BodyTextBlockStyle}"/>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>
+    
