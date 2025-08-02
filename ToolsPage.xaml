@@ -62,9 +62,25 @@
                     <StackPanel>
                         <TextBlock Text="应用管理" 
                       Style="{StaticResource SubtitleTextBlockStyle}"/>
-                        <TextBlock Text="管理已安装的应用程序，查看详细信息并执行相关操作"
+                        <TextBlock Text="管理已安装的应用程序"
                       Style="{StaticResource BodyTextBlockStyle}"
                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                    </StackPanel>
+                </StackPanel>
+            </Button>
+
+            <Button Style="{StaticResource ClickableCardStyle}" Click="OpenStartupAppsMgmtPage_Click">
+                <StackPanel Orientation="Horizontal" Spacing="16">
+                    <Viewbox Width="48" Height="48" VerticalAlignment="Top">
+                        <Path Data="M 32 192 A 96 96 0 0 1 128 96 h 704 A 96 96 0 0 1 928 192 v 266.9 A 1 1 0 0 0 928 458 A 288 288 0 0 1 464.5 800 H 128 A 96 96 0 0 1 32 704 V 192 z m 400.4 544 A 288 288 0 0 1 864 400.5 V 192 a 32 32 0 0 0 -32 -32 H 128 a 32 32 0 0 0 -32 32 v 512 a 32 32 0 0 0 32 32 h 304.4 z M 704 416 a 224 224 0 1 0 0 448 a 224 224 0 0 0 0 -448 z M 585.3 585.3 l 96 -96 a 32 32 0 0 1 45.3 0 l 96 96 a 32 32 0 0 1 -45.3 45.3 l -41.3 -41.4 V 768 a 32 32 0 0 1 -64 0 V 589.2 l -41.3 41.4 a 32 32 0 0 1 -45.3 -45.3 z"
+      Fill="{ThemeResource TextFillColorPrimaryBrush}"/>
+                    </Viewbox>
+                    <StackPanel>
+                        <TextBlock Text="启动项管理" 
+          Style="{StaticResource SubtitleTextBlockStyle}"/>
+                        <TextBlock Text="管理系统启动时自动运行的应用程序"
+          Style="{StaticResource BodyTextBlockStyle}"
+          Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                     </StackPanel>
                 </StackPanel>
             </Button>

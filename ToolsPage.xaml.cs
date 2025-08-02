@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Diagnostics;
 using System.IO;
+using SystemInfoViewer.toolspages;
 using static SystemInfoViewer.MainWindow;
 
 namespace SystemInfoViewer
@@ -90,6 +91,11 @@ namespace SystemInfoViewer
         private void OpenAppMgmtPage_Click(object sender, RoutedEventArgs e)
         {
             NavigationService.Instance.Navigate(typeof(AppMgmt));
+        }
+
+        private void OpenStartupAppsMgmtPage_Click(object sender, RoutedEventArgs e)
+        {
+            NavigationService.Instance.Navigate(typeof(StartupAppsMgmt));
         }
 
         private async void ShowErrorMessage(string message)

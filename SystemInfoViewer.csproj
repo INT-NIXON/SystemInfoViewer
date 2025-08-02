@@ -38,6 +38,7 @@
     <None Remove="SettingsPage.xaml" />
     <None Remove="ToolsPage.xaml" />
     <None Remove="toolspages\AppMgmt.xaml" />
+    <None Remove="toolspages\StartupAppsMgmt.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -95,6 +96,9 @@
     <None Update="Apps\geek.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <Page Update="toolspages\StartupAppsMgmt.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="toolspages\AppMgmt.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
