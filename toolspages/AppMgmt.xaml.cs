@@ -1,17 +1,46 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Data;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using SystemInfoViewer.Helpers;
 
 namespace SystemInfoViewer
 {
-    public sealed partial class AppMgmt : Page
+    public sealed partial class AppMgmt : Page, INotifyPropertyChanged
     {
-        private List<SoftwareInfo>? _allSoftware;
-        private List<SoftwareInfo>? _filteredSoftware;
+        private List<SoftwareInfo> _allSoftware = new List<SoftwareInfo>();
+        private ObservableCollection<SoftwareInfo> _filteredSoftware = new ObservableCollection<SoftwareInfo>();
+        private string _searchText = string.Empty;
+        private bool _isLoading;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public ObservableCollection<SoftwareInfo> FilteredSoftware
+        {
+            get => _filteredSoftware;
+            set
+            {
+                _filteredSoftware = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public bool IsLoading
+        {
+            get => _isLoading;
+            set
+            {
+                _isLoading = value;
+                OnPropertyChanged();
+            }
+        }
 
         public AppMgmt()
         {
@@ -21,105 +50,112 @@ namespace SystemInfoViewer
 
         private void AppMgmt_Loaded(object sender, RoutedEventArgs e)
         {
-            LoadSoftwareList();
+            _ = LoadSoftwareListAsync();
         }
 
-        private void LoadSoftwareList()
+        private async Task LoadSoftwareListAsync()
         {
-            LoadingIndicator.Visibility = Visibility.Visible;
-            SoftwareList.Visibility = Visibility.Collapsed;
-            EmptyState.Visibility = Visibility.Collapsed;
-            TotalCountText.Text = "加载中...";
-
-            SoftwareList.ItemsSource = null;
-            _allSoftware = null;
-            _filteredSoftware = null;
-
-            _ = Task.Run(() =>
+            try
             {
-                var tempList = SoftwareInfoHelper.GetInstalledSoftware();
-                var totalCount = tempList.Count;
+                IsLoading = true;
+                LoadingIndicator.Visibility = Visibility.Visible;
+                AppListScrollViewer.Visibility = Visibility.Collapsed;
+                EmptyState.Visibility = Visibility.Collapsed;
+                TotalCountText.Text = "加载中...";
 
-                const int batchSize = 50;
-                var totalBatches = (int)Math.Ceiling((double)tempList.Count / batchSize);
+                // 在后台线程加载数据
+                var softwareList = await Task.Run(() => SoftwareInfoHelper.GetInstalledSoftware());
 
-                _allSoftware = tempList;
+                _allSoftware = softwareList;
 
-                for (int i = 0; i < totalBatches; i++)
+                // 分批更新UI
+                await UpdateFilteredListAsync(softwareList);
+
+                TotalCountText.Text = $"共 {softwareList.Count} 个应用";
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"加载软件列表出错: {ex.Message}");
+                EmptyState.Visibility = Visibility.Visible;
+                TotalCountText.Text = "加载失败";
+            }
+            finally
+            {
+                IsLoading = false;
+                LoadingIndicator.Visibility = Visibility.Collapsed;
+
+                if (FilteredSoftware.Count == 0)
                 {
-                    var batch = tempList.Skip(i * batchSize).Take(batchSize).ToList();
+                    EmptyState.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    AppListScrollViewer.Visibility = Visibility.Visible;
+                }
+            }
+        }
 
-                    this.DispatcherQueue.TryEnqueue(() =>
-                    {
-                        if (_filteredSoftware == null)
-                        {
-                            _filteredSoftware = new List<SoftwareInfo>(batch);
-                        }
-                        else
-                        {
-                            foreach (var item in batch)
-                            {
-                                _filteredSoftware.Add(item);
-                            }
-                        }
+        private async Task UpdateFilteredListAsync(IEnumerable<SoftwareInfo> items)
+        {
+            FilteredSoftware.Clear();
 
-                        SoftwareList.ItemsSource = _filteredSoftware;
+            // 分批添加项目以减少UI卡顿
+            const int batchSize = 50;
+            var batches = items
+                .Where(FilterSoftware)
+                .Batch(batchSize);
 
-                        TotalCountText.Text = $"共 {totalCount} 个应用";
-                    });
-
-                    System.Threading.Thread.Sleep(50);
+            foreach (var batch in batches)
+            {
+                foreach (var item in batch)
+                {
+                    FilteredSoftware.Add(item);
                 }
 
-                this.DispatcherQueue.TryEnqueue(() =>
-                {
-                    LoadingIndicator.Visibility = Visibility.Collapsed;
-
-                    if (_filteredSoftware?.Count == 0)
-                    {
-                        EmptyState.Visibility = Visibility.Visible;
-                        TotalCountText.Text = "共 0 个应用";
-                    }
-                    else
-                    {
-                        SoftwareList.Visibility = Visibility.Visible;
-                        TotalCountText.Text = $"共 {totalCount} 个应用";
-                    }
-                });
-            });
+                // 给UI线程时间处理其他事件
+                await Task.Delay(10);
+            }
         }
 
-        private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+        private bool FilterSoftware(SoftwareInfo software)
         {
-            if (_allSoftware == null) return;
+            if (string.IsNullOrWhiteSpace(_searchText))
+                return true;
 
-            var totalCount = _allSoftware.Count;
-            var searchText = SearchBox.Text?.Trim().ToLower() ?? string.Empty;
-
-            if (string.IsNullOrWhiteSpace(searchText))
-            {
-                _filteredSoftware = new List<SoftwareInfo>(_allSoftware);
-                SoftwareList.ItemsSource = _filteredSoftware;
-                TotalCountText.Text = $"共 {totalCount} 个应用";
-            }
-            else
-            {
-                _filteredSoftware = _allSoftware.Where(s =>
-                    s.Name.ToLower().Contains(searchText) ||
-                    s.Publisher.ToLower().Contains(searchText) ||
-                    s.Version.ToLower().Contains(searchText)
-                ).ToList();
-
-                SoftwareList.ItemsSource = _filteredSoftware;
-                TotalCountText.Text = $"共 {totalCount} 个应用，找到 {_filteredSoftware.Count} 个匹配项";
-            }
-
-            EmptyState.Visibility = (_filteredSoftware?.Count ?? 0) == 0 ? Visibility.Visible : Visibility.Collapsed;
+            return (software.Name?.Contains(_searchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                   (software.Publisher?.Contains(_searchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                   (software.Version?.Contains(_searchText, StringComparison.OrdinalIgnoreCase) ?? false);
         }
 
-        private void RefreshButton_Click(object sender, RoutedEventArgs e)
+        private async void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            LoadSoftwareList();
+            _searchText = SearchBox.Text?.Trim() ?? string.Empty;
+
+            if (_allSoftware == null || _allSoftware.Count == 0)
+                return;
+
+            // 防抖处理 - 延迟执行搜索
+            var currentSearch = _searchText;
+            await Task.Delay(200); // 延迟
+
+            // 确保搜索文本没有变化
+            if (currentSearch != _searchText)
+                return;
+
+            await UpdateFilteredListAsync(_allSoftware);
+
+            var count = FilteredSoftware.Count;
+            TotalCountText.Text = string.IsNullOrWhiteSpace(_searchText)
+                ? $"共 {_allSoftware.Count} 个应用"
+                : $"共 {_allSoftware.Count} 个应用，找到 {count} 个匹配项";
+
+            EmptyState.Visibility = count == 0 ? Visibility.Visible : Visibility.Collapsed;
+            AppListScrollViewer.Visibility = count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private async void RefreshButton_Click(object sender, RoutedEventArgs e)
+        {
+            await LoadSoftwareListAsync();
         }
 
         private async void UninstallButton_Click(object sender, RoutedEventArgs e)
@@ -141,7 +177,6 @@ namespace SystemInfoViewer
                 var result = await dialog.ShowAsync();
                 if (result == ContentDialogResult.Primary)
                 {
-                    // 执行卸载操作
                     bool success = SoftwareInfoHelper.UninstallSoftware(uninstallString);
                     if (!success)
                     {
@@ -155,7 +190,7 @@ namespace SystemInfoViewer
                     }
                     else
                     {
-                        LoadSoftwareList();
+                        await LoadSoftwareListAsync();
                     }
                 }
             }
@@ -166,6 +201,35 @@ namespace SystemInfoViewer
             if (Frame.CanGoBack)
             {
                 Frame.GoBack();
+            }
+        }
+
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+
+    // 扩展方法用于分批处理集合
+    public static class EnumerableExtensions
+    {
+        public static IEnumerable<IEnumerable<T>> Batch<T>(this IEnumerable<T> source, int batchSize)
+        {
+            using (var enumerator = source.GetEnumerator())
+            {
+                while (enumerator.MoveNext())
+                {
+                    yield return YieldBatchElements(enumerator, batchSize - 1);
+                }
+            }
+        }
+
+        private static IEnumerable<T> YieldBatchElements<T>(IEnumerator<T> source, int batchSize)
+        {
+            yield return source.Current;
+            for (int i = 0; i < batchSize && source.MoveNext(); i++)
+            {
+                yield return source.Current;
             }
         }
     }

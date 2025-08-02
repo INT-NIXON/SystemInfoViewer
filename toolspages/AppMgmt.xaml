@@ -114,64 +114,68 @@
                                Margin="0,8,0,0"/>
                 </StackPanel>
 
-                <!-- 应用列表 -->
-                <ListView 
-                    x:Name="SoftwareList"
-                    Visibility="Collapsed"
-                    Margin="0,8,0,0"
-                    ScrollViewer.VerticalScrollBarVisibility="Auto">
-                    <ListView.ItemTemplate>
-                        <DataTemplate x:DataType="helpers:SoftwareInfo">
-                            <StackPanel Margin="0,4">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="150"/>
-                                        <ColumnDefinition Width="120"/>
-                                        <ColumnDefinition Width="100"/>
-                                    </Grid.ColumnDefinitions>
+                <!-- 应用列表 - 使用ItemsRepeater实现虚拟化 -->
+                <ScrollViewer x:Name="AppListScrollViewer"
+                              Visibility="Collapsed"
+                              Margin="0,8,0,0">
+                    <ItemsRepeater x:Name="SoftwareRepeater"
+                                  ItemsSource="{x:Bind FilteredSoftware, Mode=OneWay}">
+                        <ItemsRepeater.Layout>
+                            <StackLayout Orientation="Vertical" Spacing="8"/>
+                        </ItemsRepeater.Layout>
+                        <ItemsRepeater.ItemTemplate>
+                            <DataTemplate x:DataType="helpers:SoftwareInfo">
+                                <StackPanel Margin="0,4">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="150"/>
+                                            <ColumnDefinition Width="120"/>
+                                            <ColumnDefinition Width="100"/>
+                                        </Grid.ColumnDefinitions>
 
-                                    <!-- 应用名称和发布者 -->
-                                    <StackPanel Grid.Column="0">
+                                        <!-- 应用名称和发布者 -->
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock 
+                                                Text="{x:Bind DisplayName}" 
+                                                Style="{StaticResource SubtitleTextBlockStyle}" 
+                                                Margin="0"/>
+                                            <TextBlock 
+                                                Text="{x:Bind Publisher}" 
+                                                Style="{StaticResource CaptionTextBlockStyle}" 
+                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                        </StackPanel>
+
+                                        <!-- 版本 -->
                                         <TextBlock 
-                                            Text="{x:Bind DisplayName, FallbackValue='未知应用'}" 
-                                            Style="{StaticResource SubtitleTextBlockStyle}" 
-                                            Margin="0"/>
+                                            Grid.Column="1" 
+                                            Text="{x:Bind Version}" 
+                                            Style="{StaticResource BodyTextBlockStyle}"
+                                            VerticalAlignment="Center"/>
+
+                                        <!-- 安装日期 -->
                                         <TextBlock 
-                                            Text="{x:Bind Publisher, FallbackValue='未知发布者', TargetNullValue='未知发布者'}" 
-                                            Style="{StaticResource CaptionTextBlockStyle}" 
-                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                                    </StackPanel>
+                                            Grid.Column="2" 
+                                            Text="{x:Bind FormattedInstallDate}" 
+                                            Style="{StaticResource BodyTextBlockStyle}"
+                                            VerticalAlignment="Center"/>
 
-                                    <!-- 版本 -->
-                                    <TextBlock 
-                                        Grid.Column="1" 
-                                        Text="{x:Bind Version, FallbackValue='未知版本', TargetNullValue='未知版本'}" 
-                                        Style="{StaticResource BodyTextBlockStyle}"
-                                        VerticalAlignment="Center"/>
-
-                                    <!-- 安装日期 -->
-                                    <TextBlock 
-                                        Grid.Column="2" 
-                                        Text="{x:Bind FormattedInstallDate, FallbackValue='未知日期', TargetNullValue='未知日期'}" 
-                                        Style="{StaticResource BodyTextBlockStyle}"
-                                        VerticalAlignment="Center"/>
-
-                                    <!-- 卸载按钮 -->
-                                    <Button 
-                                        Grid.Column="3"
-                                        Content="卸载" 
-                                        Click="UninstallButton_Click"
-                                        Tag="{x:Bind UninstallString, FallbackValue='', TargetNullValue=''}"
-                                        DataContext="{x:Bind}"
-                                        IsEnabled="{x:Bind HasUninstallString}"
-                                        HorizontalAlignment="Right"/>
-                                </Grid>
-                                <Border Height="1" Background="{ThemeResource CardBorderBrush}" Margin="0,8,0,0"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
+                                        <!-- 卸载按钮 -->
+                                        <Button 
+                                            Grid.Column="3"
+                                            Content="卸载" 
+                                            Click="UninstallButton_Click"
+                                            Tag="{x:Bind UninstallString}"
+                                            DataContext="{x:Bind}"
+                                            IsEnabled="{x:Bind HasUninstallString}"
+                                            HorizontalAlignment="Right"/>
+                                    </Grid>
+                                    <Border Height="1" Background="{ThemeResource CardBorderBrush}" Margin="0,8,0,0"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsRepeater.ItemTemplate>
+                    </ItemsRepeater>
+                </ScrollViewer>
             </Grid>
         </StackPanel>
     </ScrollViewer>
