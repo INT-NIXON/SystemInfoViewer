@@ -49,6 +49,141 @@
                            Style="{StaticResource HeaderTextBlockStyle}"
                            Margin="0"/>
             </StackPanel>
+
+            <!-- 总数和匹配项显示 -->
+            <TextBlock x:Name="TotalCountText"
+                       Text="共 0 个启动项"
+                       Style="{StaticResource BodyTextBlockStyle}"
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+
+            <!-- 搜索和刷新区域 -->
+            <Grid Margin="0,0,0,16" ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBox 
+                    x:Name="SearchBox"
+                    PlaceholderText="搜索启动项..."
+                    TextChanged="SearchBox_TextChanged"
+                    HorizontalAlignment="Stretch"
+                    FontSize="14"
+                    Padding="12,8"
+                    CornerRadius="4"
+                    BorderThickness="1"
+                    BorderBrush="{ThemeResource CardBorderBrush}"
+                    Background="{ThemeResource CardBackgroundBrush}"/>
+
+                <Button 
+                    x:Name="RefreshButton"
+                    Grid.Column="1"
+                    Click="RefreshButton_Click"
+                    HorizontalAlignment="Left"
+                    Height="{Binding ActualHeight, ElementName=SearchBox}"
+                    MinWidth="100"
+                    Padding="12,0">
+                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <SymbolIcon Symbol="Refresh"/>
+                        <TextBlock Text="刷新" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
+
+            <Grid MinHeight="400">
+                <!-- 加载指示器 -->
+                <StackPanel x:Name="LoadingIndicator" Visibility="Collapsed" 
+                            HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <ProgressRing IsActive="True" Width="40" Height="40"/>
+                    <TextBlock Text="正在加载启动项..." 
+                               Style="{StaticResource BodyTextBlockStyle}" 
+                               Margin="0,8,0,0"
+                               TextAlignment="Center"/>
+                </StackPanel>
+
+                <!-- 空状态 -->
+                <StackPanel x:Name="EmptyState" Visibility="Collapsed" 
+                            HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock Text="未找到启动项" 
+                               Style="{StaticResource SubtitleTextBlockStyle}"
+                               TextAlignment="Center"/>
+                    <TextBlock Text="尝试刷新列表或检查系统设置" 
+                               Style="{StaticResource BodyTextBlockStyle}" 
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               TextAlignment="Center"
+                               Margin="0,8,0,0"/>
+                </StackPanel>
+
+                <!-- 启动项列表 -->
+                <ScrollViewer x:Name="StartupListScrollViewer"
+                              Visibility="Collapsed"
+                              Margin="0,8,0,0">
+                    <ItemsRepeater x:Name="StartupRepeater"
+                                  ItemsSource="{x:Bind FilteredStartupApps, Mode=OneWay}">
+                        <ItemsRepeater.Layout>
+                            <StackLayout Orientation="Vertical" Spacing="8"/>
+                        </ItemsRepeater.Layout>
+                        <ItemsRepeater.ItemTemplate>
+                            <DataTemplate x:DataType="helpers:StartupAppInfo">
+                                <StackPanel Margin="0,4">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="180"/>
+                                            <!-- 位置信息列 -->
+                                            <ColumnDefinition Width="Auto"/>
+                                            <!-- 开关按钮列 -->
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- 启动项名称、发布者、路径和注册表信息（保持原有顺序） -->
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock 
+                                                Text="{x:Bind Name}" 
+                                                Style="{StaticResource SubtitleTextBlockStyle}" 
+                                                Margin="0"/>
+                                            <TextBlock 
+                                                Text="{x:Bind Publisher}" 
+                                                Style="{StaticResource CaptionTextBlockStyle}" 
+                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                            <TextBlock 
+                                                Text="{x:Bind Path}" 
+                                                Style="{StaticResource CaptionTextBlockStyle}" 
+                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                TextTrimming="CharacterEllipsis"/>
+                                            <!-- 注册表信息位置保持不变 -->
+                                            <TextBlock 
+                                                Text="{x:Bind Location}" 
+                                                Style="{StaticResource CaptionTextBlockStyle}" 
+                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                TextTrimming="CharacterEllipsis"/>
+                                        </StackPanel>
+
+                                        <!-- 空出一列位置，保持布局平衡 -->
+                                        <TextBlock 
+                                            Grid.Column="1" 
+                                            Style="{StaticResource BodyTextBlockStyle}"
+                                            VerticalAlignment="Center"/>
+
+                                        <!-- 开关按钮 -->
+                                        <ToggleSwitch 
+                                            Grid.Column="2"
+                                            IsOn="{x:Bind IsEnabled, Mode=TwoWay}"
+                                            OffContent="禁用"
+                                            OnContent="启用"
+                                            Toggled="ToggleSwitch_Toggled"
+                                            DataContext="{x:Bind}"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Center"
+                                            Margin="16,0,0,0"/>
+                                    </Grid>
+                                    <Border Height="1" Background="{ThemeResource CardBorderBrush}" Margin="0,8,0,0"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsRepeater.ItemTemplate>
+                    </ItemsRepeater>
+                </ScrollViewer>
+            </Grid>
         </StackPanel>
     </ScrollViewer>
 </Page>
+    

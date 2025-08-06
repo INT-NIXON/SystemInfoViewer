@@ -114,7 +114,7 @@
                                Margin="0,8,0,0"/>
                 </StackPanel>
 
-                <!-- 应用列表 - 使用ItemsRepeater实现虚拟化 -->
+                <!-- 应用列表 -->
                 <ScrollViewer x:Name="AppListScrollViewer"
                               Visibility="Collapsed"
                               Margin="0,8,0,0">
