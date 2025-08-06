@@ -52,14 +52,14 @@
                         </Grid.RowDefinitions>
                         <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Grid.Row="0">
     <Run Text="贡献者："/>
-    <Hyperlink NavigateUri="https://github.com/xrlzu-Project/SystemInfoViewer/graphs/contributors">
-        <Run Text="https://github.com/xrlzu-Project/SystemInfoViewer/graphs/contributors"/>
+    <Hyperlink NavigateUri="https://github.com/INT-NIXON/SystemInfoViewer/graphs/contributors">
+        <Run Text="https://github.com/INT-NIXON/SystemInfoViewer/graphs/contributors"/>
     </Hyperlink>
                         </TextBlock>
                         <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Grid.Row="1">
     <Run Text="Github页面："/>
-    <Hyperlink NavigateUri="https://github.com/xrlzu/SystemInfoViewer">
-        <Run Text="https://github.com/xrlzu/SystemInfoViewer"/>
+    <Hyperlink NavigateUri="https://github.com/INT-NIXON/SystemInfoViewer">
+        <Run Text="https://github.com/INT-NIXON/SystemInfoViewer"/>
     </Hyperlink>
                         </TextBlock>
                     </Grid>
