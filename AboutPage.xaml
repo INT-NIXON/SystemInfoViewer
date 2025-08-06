@@ -38,7 +38,7 @@
 
             <Border Style="{StaticResource InfoCardStyle}">
                 <StackPanel Spacing="8">
-                    <TextBlock Text="作者信息" 
+                    <TextBlock Text="其他信息" 
                               Style="{StaticResource SubtitleTextBlockStyle}"/>
 
                     <Grid Margin="0,8,0,0" ColumnSpacing="12" RowSpacing="8">
@@ -50,8 +50,12 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <TextBlock Text="软件作者：xrlzu" 
-           Style="{StaticResource SubtitleTextBlockStyle}" Grid.Row="0"/>
+                        <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Grid.Row="0">
+    <Run Text="贡献者："/>
+    <Hyperlink NavigateUri="https://github.com/xrlzu-Project/SystemInfoViewer/graphs/contributors">
+        <Run Text="https://github.com/xrlzu-Project/SystemInfoViewer/graphs/contributors"/>
+    </Hyperlink>
+                        </TextBlock>
                         <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Grid.Row="1">
     <Run Text="Github页面："/>
     <Hyperlink NavigateUri="https://github.com/xrlzu/SystemInfoViewer">
