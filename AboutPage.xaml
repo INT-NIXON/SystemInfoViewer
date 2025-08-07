@@ -8,7 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <ScrollViewer Padding="16" VerticalScrollBarVisibility="Auto"  Background="{ThemeResource SystemControlBackgroundAltHighBrush}">
+    <ScrollViewer Padding="16" VerticalScrollBarVisibility="Auto">
         <StackPanel Spacing="12">
             <TextBlock Text="关于" 
                       Style="{StaticResource HeaderTextBlockStyle}"/>
