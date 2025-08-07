@@ -14,10 +14,10 @@ namespace SystemInfoViewer
         private const string THEME_SETTING_KEY = "CurrentTheme";
         private const string HIDE_THEME_BUTTON_KEY = "HideThemeButton";
         private const string THEME_BUTTON_LEFT_ALIGN_KEY = "ThemeButtonLeftAlign";
+        private const bool DEFAULT_ANIMATION_STATE = true;
 
         private bool _isProcessingToggle = false;
         private bool _isUpdatingFromCode = false;
-        private const bool DEFAULT_ANIMATION_STATE = true;
 
         public SettingsPage()
         {
@@ -36,6 +36,7 @@ namespace SystemInfoViewer
             }
         }
 
+        #region 主题切换按钮对齐设置
         private void LoadThemeButtonAlignmentSetting()
         {
             try
@@ -83,7 +84,9 @@ namespace SystemInfoViewer
                     : HorizontalAlignment.Stretch;
             }
         }
+        #endregion
 
+        #region 主题设置
         private void LoadThemeSetting()
         {
             try
@@ -169,7 +172,9 @@ namespace SystemInfoViewer
                 UpdateAppTheme("system");
             }
         }
+        #endregion
 
+        #region 主题按钮显示设置
         private void LoadHideThemeButtonSetting()
         {
             try
@@ -215,7 +220,9 @@ namespace SystemInfoViewer
                 App.MainWindow.ThemeSwitchButton.Visibility = isHidden ? Visibility.Collapsed : Visibility.Visible;
             }
         }
+        #endregion
 
+        #region 系统动画设置
         private void LoadAnimationSetting()
         {
             try
@@ -278,7 +285,9 @@ namespace SystemInfoViewer
                 await errorDialog.ShowAsync();
             }
         }
+        #endregion
 
+        #region 重置设置
         private async void DelConfig_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new ContentDialog
@@ -332,5 +341,6 @@ namespace SystemInfoViewer
 
             Application.Current.Exit();
         }
+        #endregion
     }
 }
