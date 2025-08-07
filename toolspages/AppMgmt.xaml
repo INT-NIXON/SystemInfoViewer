@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:helpers="using:SystemInfoViewer.Helpers"
+    xmlns:local="using:SystemInfoViewer"
     mc:Ignorable="d">
 
     <ScrollViewer Padding="16" VerticalScrollBarVisibility="Auto">
@@ -124,7 +124,8 @@
                             <StackLayout Orientation="Vertical" Spacing="8"/>
                         </ItemsRepeater.Layout>
                         <ItemsRepeater.ItemTemplate>
-                            <DataTemplate x:DataType="helpers:SoftwareInfo">
+                            <!-- 修改DataType引用，使用local命名空间 -->
+                            <DataTemplate x:DataType="local:SoftwareInfo">
                                 <StackPanel Margin="0,4">
                                     <Grid>
                                         <Grid.ColumnDefinitions>

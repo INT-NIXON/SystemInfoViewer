@@ -1,18 +1,250 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Data;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using SystemInfoViewer.Helpers;
 
 namespace SystemInfoViewer
 {
+    #region 数据模型
+    /// <summary>
+    /// 软件信息数据模型类
+    /// </summary>
+    public class SoftwareInfo
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Version { get; set; } = string.Empty;
+        public string Publisher { get; set; } = string.Empty;
+        public DateTime? InstallDate { get; set; }
+        public string InstallLocation { get; set; } = string.Empty;
+        public string UninstallString { get; set; } = string.Empty;
+
+        public string DisplayName => string.IsNullOrEmpty(Name) ? "未知应用" : Name;
+        public string FormattedInstallDate => InstallDate.HasValue
+            ? InstallDate.Value.ToString("yyyy-MM-dd")
+            : "未知日期";
+        public bool HasUninstallString => !string.IsNullOrEmpty(UninstallString);
+    }
+    #endregion
+
+    #region 工具类
+    /// <summary>
+    /// 软件信息帮助类
+    /// 提供获取、解析和操作系统中安装软件的功能
+    /// </summary>
+    public static class SoftwareInfoHelper
+    {
+        /// <summary>
+        /// 获取系统中已安装的软件列表
+        /// </summary>
+        public static List<SoftwareInfo> GetInstalledSoftware()
+        {
+            var softwareList = new List<SoftwareInfo>();
+
+            var registryPaths = new[]
+            {
+                @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
+                @"SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall"
+            };
+
+            foreach (var path in registryPaths)
+            {
+                try
+                {
+                    using (var key = Registry.LocalMachine.OpenSubKey(path))
+                    {
+                        if (key == null)
+                        {
+                            Debug.WriteLine($"无法打开注册表路径: {path}");
+                            continue;
+                        }
+
+                        foreach (var subKeyName in key.GetSubKeyNames())
+                        {
+                            try
+                            {
+                                using (var subKey = key.OpenSubKey(subKeyName))
+                                {
+                                    if (subKey != null)
+                                    {
+                                        var software = GetSoftwareInfoFromRegistry(subKey);
+                                        if (software != null)
+                                        {
+                                            softwareList.Add(software);
+                                        }
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine($"处理子键 {subKeyName} 时出错: {ex.Message}");
+                                continue;
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"访问注册表路径 {path} 时出错: {ex.Message}");
+                    continue;
+                }
+            }
+
+            return softwareList
+                .GroupBy(s => s.Name)
+                .Select(g => g.First())
+                .Where(s => !string.IsNullOrEmpty(s.Name))
+                .OrderBy(s => s.Name)
+                .ToList();
+        }
+
+        /// <summary>
+        /// 从注册表项获取软件信息
+        /// </summary>
+        private static SoftwareInfo? GetSoftwareInfoFromRegistry(RegistryKey subKey)
+        {
+            try
+            {
+                var name = subKey.GetValue("DisplayName") as string;
+
+                if (string.IsNullOrEmpty(name))
+                    return null;
+
+                return new SoftwareInfo
+                {
+                    Name = name,
+                    Version = subKey.GetValue("DisplayVersion") as string ?? string.Empty,
+                    Publisher = subKey.GetValue("Publisher") as string ?? string.Empty,
+                    InstallDate = ParseInstallDate(subKey.GetValue("InstallDate") as string),
+                    InstallLocation = subKey.GetValue("InstallLocation") as string ?? string.Empty,
+                    UninstallString = subKey.GetValue("UninstallString") as string ?? string.Empty
+                };
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"获取软件信息出错: {ex.Message}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 解析安装日期（注册表中的格式通常是yyyyMMdd）
+        /// </summary>
+        private static DateTime? ParseInstallDate(string? installDateString)
+        {
+            if (string.IsNullOrEmpty(installDateString))
+                return null;
+
+            var cleanDate = installDateString.Trim();
+
+            try
+            {
+                var formats = new[]
+                {
+                    "yyyyMMdd",
+                    "yyyy-MM-dd",
+                    "MM/dd/yyyy",
+                    "dd/MM/yyyy",
+                    "yyyyMMddHHmmss"
+                };
+
+                if (DateTime.TryParseExact(cleanDate, formats,
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.None, out DateTime date))
+                {
+                    return date;
+                }
+
+                if (DateTime.TryParse(cleanDate, out date))
+                {
+                    return date;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"日期解析错误 ({installDateString}): {ex.Message}");
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// 卸载软件
+        /// </summary>
+        public static bool UninstallSoftware(string uninstallString)
+        {
+            if (string.IsNullOrEmpty(uninstallString))
+                return false;
+
+            try
+            {
+                string executable = string.Empty;
+                string arguments = string.Empty;
+
+                if (uninstallString.StartsWith("\""))
+                {
+                    int quoteIndex = uninstallString.IndexOf("\"", 1);
+                    if (quoteIndex > 0)
+                    {
+                        executable = uninstallString.Substring(1, quoteIndex - 1);
+                        arguments = uninstallString.Substring(quoteIndex + 1).Trim();
+                    }
+                }
+                else
+                {
+                    string[] parts = uninstallString.Split(new[] { ' ' }, 2);
+                    executable = parts[0];
+                    if (parts.Length > 1)
+                        arguments = parts[1];
+                }
+
+                Process.Start(new ProcessStartInfo(executable, arguments)
+                {
+                    UseShellExecute = true
+                });
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"卸载软件出错: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 打开软件安装目录
+        /// </summary>
+        public static bool OpenInstallLocation(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                return false;
+
+            try
+            {
+                Process.Start(new ProcessStartInfo("explorer.exe", path)
+                {
+                    UseShellExecute = true
+                });
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"打开安装目录出错: {ex.Message}");
+                return false;
+            }
+        }
+    }
+    #endregion
+
+    #region 页面逻辑
     public sealed partial class AppMgmt : Page, INotifyPropertyChanged
     {
         private List<SoftwareInfo> _allSoftware = new List<SoftwareInfo>();
@@ -63,12 +295,9 @@ namespace SystemInfoViewer
                 EmptyState.Visibility = Visibility.Collapsed;
                 TotalCountText.Text = "加载中...";
 
-                // 在后台线程加载数据
                 var softwareList = await Task.Run(() => SoftwareInfoHelper.GetInstalledSoftware());
 
                 _allSoftware = softwareList;
-
-                // 分批更新UI
                 await UpdateFilteredListAsync(softwareList);
 
                 TotalCountText.Text = $"共 {softwareList.Count} 个应用";
@@ -99,7 +328,6 @@ namespace SystemInfoViewer
         {
             FilteredSoftware.Clear();
 
-            // 分批添加项目以减少UI卡顿
             const int batchSize = 50;
             var batches = items
                 .Where(FilterSoftware)
@@ -111,8 +339,6 @@ namespace SystemInfoViewer
                 {
                     FilteredSoftware.Add(item);
                 }
-
-                // 给UI线程时间处理其他事件
                 await Task.Delay(10);
             }
         }
@@ -134,11 +360,9 @@ namespace SystemInfoViewer
             if (_allSoftware == null || _allSoftware.Count == 0)
                 return;
 
-            // 防抖处理 - 延迟执行搜索
             var currentSearch = _searchText;
-            await Task.Delay(200); // 延迟
+            await Task.Delay(200);
 
-            // 确保搜索文本没有变化
             if (currentSearch != _searchText)
                 return;
 
@@ -209,8 +433,9 @@ namespace SystemInfoViewer
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
+    #endregion
 
-    // 扩展方法用于分批处理集合
+    #region 扩展方法
     public static class EnumerableExtensions
     {
         public static IEnumerable<IEnumerable<T>> Batch<T>(this IEnumerable<T> source, int batchSize)
@@ -233,4 +458,5 @@ namespace SystemInfoViewer
             }
         }
     }
+    #endregion
 }
