@@ -13,6 +13,7 @@ namespace SystemInfoViewer
         private const string ANIMATION_SETTING_KEY = "WindowAnimationEnabled";
         private const string THEME_SETTING_KEY = "CurrentTheme";
         private const string HIDE_THEME_BUTTON_KEY = "HideThemeButton";
+        private const string THEME_BUTTON_LEFT_ALIGN_KEY = "ThemeButtonLeftAlign";
 
         private bool _isProcessingToggle = false;
         private bool _isUpdatingFromCode = false;
@@ -24,6 +25,7 @@ namespace SystemInfoViewer
             LoadAnimationSetting();
             LoadThemeSetting();
             LoadHideThemeButtonSetting();
+            LoadThemeButtonAlignmentSetting();
 
             var uiSettings = new UISettings();
             uiSettings.ColorValuesChanged += UiSettings_ColorValuesChanged;
@@ -31,6 +33,54 @@ namespace SystemInfoViewer
             if (App.MainWindow != null)
             {
                 App.MainWindow.ThemeChanged += MainWindow_ThemeChanged;
+            }
+        }
+
+        private void LoadThemeButtonAlignmentSetting()
+        {
+            try
+            {
+                string savedValue = FileHelper.ReadIniValue("UI", THEME_BUTTON_LEFT_ALIGN_KEY, "false");
+                bool isLeftAlign = bool.Parse(savedValue);
+                ThemeButtonLeftAlignCheckBox.IsChecked = isLeftAlign;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"加载主题按钮对齐配置失败: {ex.Message}");
+                ThemeButtonLeftAlignCheckBox.IsChecked = false;
+            }
+        }
+
+        private void ThemeButtonLeftAlignCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            SaveThemeButtonAlignmentSetting(true);
+        }
+
+        private void ThemeButtonLeftAlignCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            SaveThemeButtonAlignmentSetting(false);
+        }
+
+        private void SaveThemeButtonAlignmentSetting(bool isLeftAlign)
+        {
+            try
+            {
+                FileHelper.WriteIniValue("UI", THEME_BUTTON_LEFT_ALIGN_KEY, isLeftAlign.ToString().ToLower());
+                UpdateThemeButtonAlignment(isLeftAlign);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"保存主题按钮对齐配置失败: {ex.Message}");
+            }
+        }
+
+        private void UpdateThemeButtonAlignment(bool isLeftAlign)
+        {
+            if (App.MainWindow != null && App.MainWindow.ThemeSwitchButton != null)
+            {
+                App.MainWindow.ThemeSwitchButton.HorizontalAlignment = isLeftAlign
+                    ? HorizontalAlignment.Left
+                    : HorizontalAlignment.Stretch;
             }
         }
 
@@ -165,7 +215,6 @@ namespace SystemInfoViewer
                 App.MainWindow.ThemeSwitchButton.Visibility = isHidden ? Visibility.Collapsed : Visibility.Visible;
             }
         }
-
 
         private void LoadAnimationSetting()
         {

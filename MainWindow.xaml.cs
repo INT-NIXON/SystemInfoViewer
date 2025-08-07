@@ -45,6 +45,7 @@ namespace SystemInfoViewer
             LoadSavedTheme();
             LoadWindowAnimationSetting();
             LoadHideThemeButtonSetting();
+            LoadThemeButtonAlignmentSetting();
             ForceTitleBarUpdate(_isDarkTheme).ConfigureAwait(false);
 
             this.Activated += MainWindow_Activated;
@@ -101,11 +102,13 @@ namespace SystemInfoViewer
                 string savedValue = FileHelper.ReadIniValue("UI", HIDE_THEME_BUTTON_KEY, "false");
                 bool isHidden = bool.Parse(savedValue);
                 ThemeToggleButton.Visibility = isHidden ? Visibility.Collapsed : Visibility.Visible;
+
+                LoadThemeButtonAlignmentSetting();
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"初始化主题按钮显示状态失败: {ex.Message}");
-                ThemeToggleButton.Visibility = Visibility.Visible; // 默认显示
+                ThemeToggleButton.Visibility = Visibility.Visible;
             }
         }
 
@@ -132,6 +135,24 @@ namespace SystemInfoViewer
                 _presenter.IsMaximizable = true;
                 _presenter.IsMinimizable = true;
                 _presenter.IsResizable = true;
+            }
+        }
+
+        private void LoadThemeButtonAlignmentSetting()
+        {
+            try
+            {
+                string savedValue = FileHelper.ReadIniValue("UI", "ThemeButtonLeftAlign", "false");
+                bool isLeftAlign = bool.Parse(savedValue);
+
+                ThemeToggleButton.HorizontalAlignment = isLeftAlign
+                    ? HorizontalAlignment.Left
+                    : HorizontalAlignment.Stretch;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"加载主题按钮对齐配置失败: {ex.Message}");
+                ThemeToggleButton.HorizontalAlignment = HorizontalAlignment.Stretch;
             }
         }
 

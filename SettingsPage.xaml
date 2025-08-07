@@ -29,14 +29,28 @@
                             <ComboBoxItem Tag="System">跟随系统</ComboBoxItem>
                         </ComboBox>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0" Spacing="-90">
-                        <CheckBox x:Name="HideThemeButtonCheckBox"
-                                  Checked="HideThemeButtonCheckBox_Checked"
-                                  Unchecked="HideThemeButtonCheckBox_Unchecked"/>
-                        <TextBlock Text="隐藏侧边栏主题切换按钮"
-           VerticalAlignment="Center"
-           Style="{StaticResource BodyTextBlockStyle}"/>
-                    </StackPanel>
+                    <Grid Margin="0,8,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Orientation="Horizontal" Grid.Column="0" Spacing="-90">
+                            <CheckBox x:Name="HideThemeButtonCheckBox"
+                  Checked="HideThemeButtonCheckBox_Checked"
+                  Unchecked="HideThemeButtonCheckBox_Unchecked"/>
+                            <TextBlock Text="隐藏侧边栏主题切换按钮"
+                   VerticalAlignment="Center"
+                   Style="{StaticResource BodyTextBlockStyle}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Grid.Column="1" Margin="-150,0,0,0" Spacing="-90">
+                            <CheckBox x:Name="ThemeButtonLeftAlignCheckBox"
+                  Checked="ThemeButtonLeftAlignCheckBox_Checked"
+                  Unchecked="ThemeButtonLeftAlignCheckBox_Unchecked"/>
+                            <TextBlock Text="侧边栏主题切换按钮靠左显示"
+                   VerticalAlignment="Center"
+                   Style="{StaticResource BodyTextBlockStyle}"/>
+                        </StackPanel>
+                    </Grid>
                 </StackPanel>
             </Border>
 
