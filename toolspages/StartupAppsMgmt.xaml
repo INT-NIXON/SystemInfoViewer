@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:helpers="using:SystemInfoViewer.Helpers"
+    xmlns:local="using:SystemInfoViewer.toolspages"
     mc:Ignorable="d">
 
     <ScrollViewer Padding="16" VerticalScrollBarVisibility="Auto">
@@ -124,7 +124,7 @@
                             <StackLayout Orientation="Vertical" Spacing="8"/>
                         </ItemsRepeater.Layout>
                         <ItemsRepeater.ItemTemplate>
-                            <DataTemplate x:DataType="helpers:StartupAppInfo">
+                            <DataTemplate x:DataType="local:StartupAppInfo">
                                 <StackPanel Margin="0,4">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -135,7 +135,7 @@
                                             <!-- 开关按钮列 -->
                                         </Grid.ColumnDefinitions>
 
-                                        <!-- 启动项名称、发布者、路径和注册表信息（保持原有顺序） -->
+                                        <!-- 启动项名称、发布者、路径和注册表信息 -->
                                         <StackPanel Grid.Column="0">
                                             <TextBlock 
                                                 Text="{x:Bind Name}" 
@@ -150,7 +150,6 @@
                                                 Style="{StaticResource CaptionTextBlockStyle}" 
                                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                 TextTrimming="CharacterEllipsis"/>
-                                            <!-- 注册表信息位置保持不变 -->
                                             <TextBlock 
                                                 Text="{x:Bind Location}" 
                                                 Style="{StaticResource CaptionTextBlockStyle}" 
@@ -186,4 +185,3 @@
         </StackPanel>
     </ScrollViewer>
 </Page>
-    
