@@ -24,6 +24,10 @@ namespace SystemInfoViewer
     {
         private const string THEME_SETTING_KEY = "CurrentTheme";
         private const string HIDE_THEME_BUTTON_KEY = "HideThemeButton";
+        private const int MIN_WIDTH = 1100;
+        private const int MIN_HEIGHT = 760;
+        private const string WINDOW_WIDTH_KEY = "WindowWidth";
+        private const string WINDOW_HEIGHT_KEY = "WindowHeight";
 
         public event Action<ElementTheme>? ThemeChanged;
         private bool _isDarkTheme = false;
@@ -62,7 +66,7 @@ namespace SystemInfoViewer
             var windowId = Win32Interop.GetWindowIdFromWindow(_hWnd);
             _appWindow = AppWindow.GetFromWindowId(windowId);
 
-            SetWindowSize(1100, 760);
+            LoadAndSetWindowSize();
             ConfigureCustomTitleBar();
             InitializeTimer();
 
@@ -71,6 +75,11 @@ namespace SystemInfoViewer
                 if (args.DidPresenterChange)
                 {
                     UpdateTitleBarButtons();
+                }
+                if (args.DidSizeChange)
+                {
+                    EnforceMinWindowSize();
+                    SaveWindowSize();
                 }
             };
 
@@ -304,17 +313,83 @@ namespace SystemInfoViewer
             {
                 var dpi = GetDpiForWindow(_hWnd);
                 float scalingFactor = (float)dpi / 96;
+                int scaledWidth = (int)(width * scalingFactor);
+                int scaledHeight = (int)(height * scalingFactor);
+
                 SetWindowPos(
                     _hWnd,
                     IntPtr.Zero,
                     0, 0,
-                    (int)(width * scalingFactor),
-                    (int)(height * scalingFactor),
+                    scaledWidth,
+                    scaledHeight,
                     0x0002 | 0x0004);
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"设置窗口大小失败: {ex.Message}");
+            }
+        }
+        #endregion
+
+        #region 窗口大小限制与保存
+        private void LoadAndSetWindowSize()
+        {
+            try
+            {
+                string widthStr = FileHelper.ReadIniValue("Window", WINDOW_WIDTH_KEY, MIN_WIDTH.ToString());
+                string heightStr = FileHelper.ReadIniValue("Window", WINDOW_HEIGHT_KEY, MIN_HEIGHT.ToString());
+
+                int width = Math.Max(int.Parse(widthStr), MIN_WIDTH);
+                int height = Math.Max(int.Parse(heightStr), MIN_HEIGHT);
+
+                SetWindowSize(width, height);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"加载窗口大小失败，使用默认值: {ex.Message}");
+                SetWindowSize(MIN_WIDTH, MIN_HEIGHT);
+            }
+        }
+
+        private void EnforceMinWindowSize()
+        {
+            if (_appWindow == null) return;
+
+            var dpi = GetDpiForWindow(_hWnd);
+            float scalingFactor = (float)dpi / 96;
+            int currentWidth = (int)(_appWindow.Size.Width / scalingFactor);
+            int currentHeight = (int)(_appWindow.Size.Height / scalingFactor);
+
+            int newWidth = Math.Max(currentWidth, MIN_WIDTH);
+            int newHeight = Math.Max(currentHeight, MIN_HEIGHT);
+
+            if (newWidth != currentWidth || newHeight != currentHeight)
+            {
+                SetWindowSize(newWidth, newHeight);
+            }
+        }
+
+        private void SaveWindowSize()
+        {
+            if (_appWindow == null) return;
+
+            try
+            {
+                var dpi = GetDpiForWindow(_hWnd);
+                float scalingFactor = (float)dpi / 96;
+                int currentWidth = (int)(_appWindow.Size.Width / scalingFactor);
+                int currentHeight = (int)(_appWindow.Size.Height / scalingFactor);
+
+
+                int saveWidth = Math.Max(currentWidth, MIN_WIDTH);
+                int saveHeight = Math.Max(currentHeight, MIN_HEIGHT);
+
+                FileHelper.WriteIniValue("Window", WINDOW_WIDTH_KEY, saveWidth.ToString());
+                FileHelper.WriteIniValue("Window", WINDOW_HEIGHT_KEY, saveHeight.ToString());
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"保存窗口大小失败: {ex.Message}");
             }
         }
         #endregion
@@ -517,7 +592,6 @@ namespace SystemInfoViewer
     }
 
     #region 系统参数辅助类
-
     internal static class SystemParametersInfoHelper
     {
         private const int SPI_GETANIMATION = 0x0048;
