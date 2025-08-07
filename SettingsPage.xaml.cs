@@ -227,20 +227,20 @@ namespace SystemInfoViewer
         {
             try
             {
-                string savedValue = FileHelper.ReadIniValue("Settings", ANIMATION_SETTING_KEY, "");
+                string savedValue = FileHelper.ReadIniValue("SystemSettings", ANIMATION_SETTING_KEY, "");
 
                 bool isEnabled;
                 if (string.IsNullOrEmpty(savedValue))
                 {
                     isEnabled = DEFAULT_ANIMATION_STATE;
-                    FileHelper.WriteIniValue("Settings", ANIMATION_SETTING_KEY, isEnabled.ToString().ToLower());
+                    FileHelper.WriteIniValue("SystemSettings", ANIMATION_SETTING_KEY, isEnabled.ToString().ToLower());
                 }
                 else
                 {
                     if (!bool.TryParse(savedValue, out isEnabled))
                     {
                         isEnabled = DEFAULT_ANIMATION_STATE;
-                        FileHelper.WriteIniValue("Settings", ANIMATION_SETTING_KEY, isEnabled.ToString().ToLower());
+                        FileHelper.WriteIniValue("SystemSettings", ANIMATION_SETTING_KEY, isEnabled.ToString().ToLower());
                     }
                 }
                 _isProcessingToggle = true;
